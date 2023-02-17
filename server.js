@@ -68,7 +68,7 @@ function client() {
 async function cli() {
   await init(wasm());
 
-  const flags = parse(Deno.args, {
+  let flags = parse(Deno.args, {
     string: ["proxy", "watch", "base"],
     default: {proxy: "http://0.0.0.0:3000", watch: "./public", base: "/dev"},
   });
