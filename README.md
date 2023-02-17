@@ -1,1 +1,1 @@
-# cool-style-server
+# coolstyleserver
