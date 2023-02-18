@@ -29,7 +29,17 @@ function client() {
       };
     }
 
+    static get observedAttributes() {
+      return ["media"];
+    }
+
     #sheet;
+
+    attributeChangedCallback(_, oldMedia, media) {
+      if (oldMedia) this.#sheet?.media?.deleteMedium(oldMedia);
+
+      if (media) this.#sheet?.media?.appendMedium(media);
+    }
 
     constructor() {
       super();
@@ -55,9 +65,11 @@ function client() {
       fetch(href)
         .then((res) => res.text())
         .then((css) => {
+          if (css.includes("@import")) return;
+
           this.#sheet.replaceSync(css);
 
-          this.setAttribute("media", "none");
+          this.sheet.disabled = true;
         });
     }
   }
