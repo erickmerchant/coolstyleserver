@@ -6,7 +6,7 @@ import {resolve} from "https://deno.land/std@0.177.0/path/mod.ts";
 import {parse} from "https://deno.land/std@0.177.0/flags/mod.ts";
 
 function client() {
-  class DevStylesheet extends HTMLLinkElement {
+  class CoolStylesheet extends HTMLLinkElement {
     static #nodes = new Map();
 
     static {
@@ -14,7 +14,7 @@ function client() {
 
       base = base.pathname.substring(0, base.pathname.length - 10);
 
-      let esrc = new EventSource(`${base}/_changes`);
+      let esrc = new EventSource(`${base}/changes`);
 
       esrc.onmessage = (event) => {
         let data = JSON.parse(event.data);
@@ -46,11 +46,11 @@ function client() {
 
       let href = this.getAttribute("href");
 
-      let map = DevStylesheet.#nodes.get(href) ?? [];
+      let map = CoolStylesheet.#nodes.get(href) ?? [];
 
       map.push(new WeakRef(this));
 
-      DevStylesheet.#nodes.set(href, map);
+      CoolStylesheet.#nodes.set(href, map);
 
       let options = {};
 
@@ -80,14 +80,14 @@ function client() {
     }
   }
 
-  customElements.define("dev-stylesheet", DevStylesheet, {extends: "link"});
+  customElements.define("cool-stylesheet", CoolStylesheet, {extends: "link"});
 }
 
 let usage = `
 $ coolstyleserver [options]
 -p, --proxy=<url>       Your dev server. Include the protocol. Also the port if it's not 80 [default: http://0.0.0.0:3000]
 -w, --watch=<dir>       The directory where your CSS is. [default: ./public]
--b, --base=<dir>        Set if /dev conflicts with a route on your dev server [default: /dev]
+-b, --base=<dir>        Set if /coolstyle conflicts with a route on your dev server [default: /coolstyle]
 -h, --help              Print this message
 `.trim();
 
@@ -96,7 +96,11 @@ async function cli() {
     string: ["proxy", "watch", "base"],
     boolean: ["help"],
     alias: {proxy: "p", watch: "w", base: "b", help: "h"},
-    default: {proxy: "http://0.0.0.0:3000", watch: "./public", base: "/dev"},
+    default: {
+      proxy: "http://0.0.0.0:3000",
+      watch: "./public",
+      base: "/coolstyle",
+    },
   });
 
   if (flags.help) {
@@ -120,7 +124,7 @@ async function cli() {
       });
     }
 
-    if (path === `${flags.base}/_changes`) {
+    if (path === `${flags.base}/changes`) {
       let watcher = Deno.watchFs(flags.watch);
       let enc = new TextEncoder();
 
@@ -178,7 +182,7 @@ async function cli() {
 
       rewriter.on("link[rel=stylesheet]", {
         element(el) {
-          el.setAttribute("is", "dev-stylesheet");
+          el.setAttribute("is", "cool-stylesheet");
 
           el.after(
             `<script type="module" src="${flags.base}/client.js"></script>`,
