@@ -35,10 +35,10 @@ function client() {
 
     #sheet;
 
-    attributeChangedCallback(_, oldMedia, media) {
-      if (oldMedia) this.#sheet?.media?.deleteMedium(oldMedia);
+    attributeChangedCallback(_, old, value) {
+      if (old) this.#sheet?.media?.deleteMedium(old);
 
-      if (media) this.#sheet?.media?.appendMedium(media);
+      if (value) this.#sheet?.media?.appendMedium(value);
     }
 
     constructor() {
@@ -52,7 +52,13 @@ function client() {
 
       DevStylesheet.#nodes.set(href, map);
 
-      this.#sheet = this.#sheet ?? new CSSStyleSheet();
+      let options = {};
+
+      if (this.hasAttribute("media")) {
+        options.media = this.getAttribute("media");
+      }
+
+      this.#sheet = this.#sheet ?? new CSSStyleSheet(options);
 
       this.#sheet.replaceSync("");
 
