@@ -126,6 +126,7 @@ async function cli() {
 
     if (path === `${flags.base}/changes`) {
       let watcher = Deno.watchFs(flags.watch);
+      let hrefs = new Set();
       let enc = new TextEncoder();
 
       let body = new ReadableStream({
@@ -135,12 +136,23 @@ async function cli() {
           let watchDir = resolve(flags.watch);
 
           for await (let e of watcher) {
-            let data = JSON.stringify({
-              hrefs: e.paths
-                .filter((p) => p.endsWith(".css"))
-                .map((p) => p.substring(watchDir.length)),
-            });
-            controller.enqueue(enc.encode(`data: ${data}\n\n`));
+            for (let href of e.paths
+              .filter((p) => p.endsWith(".css"))
+              .map((p) => p.substring(watchDir.length))) {
+              hrefs.add(href);
+            }
+
+            setTimeout(() => {
+              if (hrefs.size) {
+                let data = JSON.stringify({
+                  hrefs: [...hrefs.values()],
+                });
+
+                hrefs.clear();
+
+                controller.enqueue(enc.encode(`data: ${data}\n\n`));
+              }
+            }, 10);
           }
         },
         cancel() {
@@ -150,8 +162,8 @@ async function cli() {
 
       return new Response(body, {
         headers: {
-          "Content-Type": "text/event-stream",
-          "Cache-Control": "no-cache",
+          "content-type": "text/event-stream",
+          "cache-control": "no-cache",
         },
       });
     }
@@ -190,12 +202,6 @@ async function cli() {
               html: true,
             }
           );
-        },
-      });
-
-      rewriter.on("link[rel=preload][as=style]", {
-        element(el) {
-          el.remove();
         },
       });
 
