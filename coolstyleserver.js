@@ -10,10 +10,10 @@ function client() {
     static #nodes = new Map();
 
     static {
-      let base = new URL(import.meta.url);
-
-      base = base.pathname.substring(0, base.pathname.length - 10);
-
+      let base = new URL(import.meta.url).pathname.substring(
+        0,
+        base.pathname.length - 10
+      );
       let esrc = new EventSource(`${base}/changes`);
 
       esrc.onmessage = (event) => {
@@ -45,14 +45,13 @@ function client() {
       super();
 
       let href = this.getAttribute("href");
-
       let map = CoolStylesheet.#nodes.get(href) ?? [];
+      let root = this.getRootNode();
+      let options = {};
 
       map.push(new WeakRef(this));
 
       CoolStylesheet.#nodes.set(href, map);
-
-      let options = {};
 
       if (this.hasAttribute("media")) {
         options.media = this.getAttribute("media");
@@ -61,8 +60,6 @@ function client() {
       this.#sheet = this.#sheet ?? new CSSStyleSheet(options);
 
       this.#sheet.replaceSync("");
-
-      let root = this.getRootNode();
 
       root.adoptedStyleSheets = [...root.adoptedStyleSheets, this.#sheet];
     }
@@ -128,7 +125,6 @@ async function cli() {
       let watcher = Deno.watchFs(flags.watch);
       let hrefs = new Set();
       let enc = new TextEncoder();
-
       let body = new ReadableStream({
         async start(controller) {
           controller.enqueue(enc.encode(`\n\n`));
@@ -187,7 +183,6 @@ async function cli() {
       let enc = new TextEncoder();
       let dec = new TextDecoder();
       let chunks = [];
-
       let rewriter = new HTMLRewriter("utf8", (chunk) => {
         chunks.push(chunk);
       });
