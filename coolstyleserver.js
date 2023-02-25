@@ -3,17 +3,16 @@ import {parse} from "https://deno.land/std@0.177.0/flags/mod.ts";
 import {serve} from "https://deno.land/std@0.177.0/http/mod.ts";
 import {resolve} from "https://deno.land/std@0.177.0/path/mod.ts";
 import init, {HTMLRewriter} from "https://deno.land/x/lol_html@0.0.6/mod.ts";
-import wasm from "https://deno.land/x/lol_html@0.0.6/wasm.js";
 
 function client() {
   class CoolStylesheet extends HTMLLinkElement {
     static #nodes = new Map();
 
     static {
-      let base = new URL(import.meta.url).pathname.substring(
-        0,
-        base.pathname.length - 10
-      );
+      let base = new URL(import.meta.url);
+
+      base = base.pathname.substring(0, base.pathname.length - 10);
+
       let esrc = new EventSource(`${base}/changes`);
 
       esrc.onmessage = (event) => {
@@ -106,7 +105,7 @@ async function cli() {
     return;
   }
 
-  await init(wasm());
+  await init();
 
   let reqHandler = async (req) => {
     let path = new URL(req.url).pathname;
