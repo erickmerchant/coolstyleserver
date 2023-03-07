@@ -81,6 +81,7 @@ function client() {
 
 let usage = `
 $ coolstyleserver [options]
+-P, --port=<number>     The port to listen at [default: 4000]
 -p, --proxy=<url>       Your dev server. Include the protocol. Also the port if it's not 80 [default: http://0.0.0.0:3000]
 -w, --watch=<dir>       The directory where your CSS is. [default: ./public]
 -b, --base=<dir>        Set if /coolstyle conflicts with a route on your dev server [default: /coolstyle]
@@ -90,10 +91,12 @@ $ coolstyleserver [options]
 async function cli() {
   let flags = parse(Deno.args, {
     string: ["proxy", "watch", "base"],
+    number: ["port"],
     boolean: ["help"],
-    alias: {proxy: "p", watch: "w", base: "b", help: "h"},
+    alias: {proxy: "p", port: "P", watch: "w", base: "b", help: "h"},
     default: {
       proxy: "http://0.0.0.0:3000",
+      port: 4000,
       watch: "./public",
       base: "/coolstyle",
     },
@@ -215,7 +218,7 @@ async function cli() {
     });
   };
 
-  serve(reqHandler, {port: 4000});
+  serve(reqHandler, {port: flags.port});
 }
 
 if (import.meta.main) {
