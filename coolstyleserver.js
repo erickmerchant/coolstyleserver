@@ -166,56 +166,104 @@ async function cli() {
       });
     }
 
-    let proxyRes = await fetch(flags.proxy + path);
-    let headers = new Headers();
-    let contentType;
-    let body = proxyRes.body;
+    try {
+      let proxyRes = await fetch(flags.proxy + path);
+      let headers = new Headers();
+      let contentType;
+      let body = proxyRes.body;
 
-    for (let [name, value] of proxyRes.headers) {
-      if (name === "content-type") {
-        contentType = value;
+      for (let [name, value] of proxyRes.headers) {
+        if (name === "content-type") {
+          contentType = value;
+        }
+
+        headers.set(name, value);
       }
 
-      headers.set(name, value);
-    }
+      if (contentType.startsWith("text/html")) {
+        body = await proxyRes.text();
 
-    if (contentType.startsWith("text/html")) {
-      body = await proxyRes.text();
+        let enc = new TextEncoder();
+        let dec = new TextDecoder();
+        let chunks = [];
+        let rewriter = new HTMLRewriter("utf8", (chunk) => {
+          chunks.push(chunk);
+        });
 
-      let enc = new TextEncoder();
-      let dec = new TextDecoder();
-      let chunks = [];
-      let rewriter = new HTMLRewriter("utf8", (chunk) => {
-        chunks.push(chunk);
+        rewriter.on("link[rel=stylesheet]", {
+          element(el) {
+            el.setAttribute("is", "cool-stylesheet");
+
+            el.after(
+              `<script type="module" src="${flags.base}/client.js"></script>`,
+              {
+                html: true,
+              }
+            );
+          },
+        });
+
+        rewriter.write(enc.encode(body));
+
+        try {
+          rewriter.end();
+          body = dec.decode(concat(...chunks));
+        } finally {
+          rewriter.free();
+        }
+      }
+
+      return new Response(body, {
+        status: proxyRes.status,
+        headers,
       });
-
-      rewriter.on("link[rel=stylesheet]", {
-        element(el) {
-          el.setAttribute("is", "cool-stylesheet");
-
-          el.after(
-            `<script type="module" src="${flags.base}/client.js"></script>`,
-            {
-              html: true,
+    } catch (e) {
+      return new Response(
+        `<!doctype html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <title>coolstyleserver error page</title>
+            ${
+              e instanceof TypeError
+                ? `<meta http-equiv="refresh" content="1">`
+                : ""
             }
-          );
-        },
-      });
-
-      rewriter.write(enc.encode(body));
-
-      try {
-        rewriter.end();
-        body = dec.decode(concat(...chunks));
-      } finally {
-        rewriter.free();
-      }
+            <style>
+              * {
+                font-family: system-ui;
+                margin: 0;
+                padding: 0;
+              }
+              body {
+                display: flex;
+                flex-direction: column;
+                max-width: 40rem;
+                margin-inline: auto;
+                gap: 2rem;
+                background: hsl(0 0% 98%);
+                color: hsl(0 0% 20%);
+              }
+              h1 { margin-block-start: 2rem; font-size: 2rem; }
+              pre {
+                white-space: pre-wrap;
+              }
+            </style>
+          </head>
+          <body>
+            <h1>${e.message}</h1>
+            <pre>${e.stack}</pre>
+          </body>
+        </html>
+        `,
+        {
+          status: 500,
+          headers: {
+            "content-type": "text/html",
+          },
+        }
+      );
     }
-
-    return new Response(body, {
-      status: proxyRes.status,
-      headers,
-    });
   };
 
   serve(reqHandler, {port: flags.port});
