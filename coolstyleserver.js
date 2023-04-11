@@ -218,51 +218,18 @@ async function cli() {
         headers,
       });
     } catch (e) {
-      return new Response(
-        `<!doctype html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <title>coolstyleserver error page</title>
-            ${
-              e instanceof TypeError
-                ? `<meta http-equiv="refresh" content="1">`
-                : ""
-            }
-            <style>
-              * {
-                font-family: system-ui;
-                margin: 0;
-                padding: 0;
-              }
-              body {
-                display: flex;
-                flex-direction: column;
-                max-width: 40rem;
-                margin-inline: auto;
-                gap: 2rem;
-                background: hsl(0 0% 98%);
-                color: hsl(0 0% 20%);
-              }
-              h1 { margin-block-start: 2rem; font-size: 2rem; }
-              pre {
-                white-space: pre-wrap;
-              }
-            </style>
-          </head>
-          <body>
-            <h1>${e.message}</h1>
-            <pre>${e.stack}</pre>
-          </body>
-        </html>
-        `,
-        {
-          status: 500,
-          headers: {
-            "content-type": "text/html",
-          },
-        }
-      );
+      let headers = {
+        "content-type": "text/html",
+      };
+
+      if (e instanceof TypeError) {
+        headers.refresh = "1";
+      }
+
+      return new Response("", {
+        status: 200,
+        headers,
+      });
     }
   };
 
