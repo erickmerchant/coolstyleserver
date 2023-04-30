@@ -180,7 +180,7 @@ async function cli() {
         headers.set(name, value);
       }
 
-      if (contentType.startsWith("text/html")) {
+      if (contentType?.startsWith("text/html")) {
         body = await proxyRes.text();
 
         let enc = new TextEncoder();
