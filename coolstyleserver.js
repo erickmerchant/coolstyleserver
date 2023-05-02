@@ -167,7 +167,9 @@ async function cli() {
     }
 
     try {
-      let proxyRes = await fetch(flags.proxy + path);
+      let proxyRes = await fetch(flags.proxy + path, {
+        headers: req.headers,
+      });
       let headers = new Headers();
       let contentType;
       let body = proxyRes.body;
