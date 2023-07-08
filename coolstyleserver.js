@@ -220,17 +220,8 @@ async function cli() {
         headers,
       });
     } catch (e) {
-      let headers = {
-        "content-type": "text/html",
-      };
-
-      if (e instanceof TypeError) {
-        headers.refresh = "1";
-      }
-
       return new Response("", {
-        status: 200,
-        headers,
+        status: 500,
       });
     }
   };
