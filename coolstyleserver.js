@@ -1,7 +1,7 @@
-import {concat} from "https://deno.land/std@0.192.0/bytes/mod.ts";
-import {parse} from "https://deno.land/std@0.192.0/flags/mod.ts";
-import {serve} from "https://deno.land/std@0.192.0/http/mod.ts";
-import {resolve} from "https://deno.land/std@0.192.0/path/mod.ts";
+import {concat} from "https://deno.land/std@0.193.0/bytes/mod.ts";
+import {parse} from "https://deno.land/std@0.193.0/flags/mod.ts";
+import {serve} from "https://deno.land/std@0.193.0/http/mod.ts";
+import {resolve} from "https://deno.land/std@0.193.0/path/mod.ts";
 import init, {HTMLRewriter} from "https://deno.land/x/lol_html@0.0.6/mod.ts";
 
 function client() {
