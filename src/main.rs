@@ -1,12 +1,16 @@
 use axum::{
 	extract::{Path, State},
 	http::{header, uri::Uri, Request},
+	response::sse::{Event, Sse},
 	response::{IntoResponse, Response},
 	routing::get,
 	Router,
 };
+use futures::stream::{self, Stream};
 use hyper::{client::HttpConnector, http::HeaderValue, Body};
-use std::{include_str, net::SocketAddr};
+use lol_html::{element, html_content::ContentType, HtmlRewriter, Settings};
+use std::{convert::Infallible, include_str, net::SocketAddr, time::Duration};
+use tokio_stream::StreamExt;
 
 type Client = hyper::client::Client<HttpConnector, Body>;
 
@@ -15,7 +19,9 @@ const COOL_STYLESHEET_JS: &str = include_str!("../cool-stylesheet.js");
 #[tokio::main]
 async fn main() {
 	let client = Client::new();
-	let cool_api = Router::new().route("/cool-stylesheet.js", get(client_js_handler));
+	let cool_api = Router::new()
+		.route("/cool-stylesheet.js", get(client_js_handler))
+		.route("/changes", get(sse_handler));
 	let app = Router::new()
 		.route("/", get(root_handler))
 		.nest("/coolstyleserver", cool_api)
@@ -40,6 +46,26 @@ async fn client_js_handler() -> Response {
 		COOL_STYLESHEET_JS.to_string(),
 	)
 		.into_response()
+}
+
+async fn sse_handler() -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
+	let stream = stream::repeat_with(|| Event::default().data(r#"{"hrefs":[]}"#))
+		.map(Ok)
+		.throttle(Duration::from_secs(1));
+
+	// 	let mut watcher = notify::recommended_watcher(|res| {
+	// 		match res {
+	// 			 Ok(event) => println!("event: {:?}", event),
+	// 			 Err(e) => println!("watch error: {:?}", e),
+	// 		}
+	// })?;
+	// watcher.watch(Path::new("."), RecursiveMode::Recursive)?;
+
+	Sse::new(stream).keep_alive(
+		axum::response::sse::KeepAlive::new()
+			.interval(Duration::from_secs(1))
+			.text("keep-alive-text"),
+	)
 }
 
 async fn handler(
@@ -68,7 +94,27 @@ async fn handler(
 		if header.as_ref().starts_with("text/html".as_bytes()) {
 			let body = hyper::body::to_bytes(res.into_body()).await.unwrap();
 			let body = String::from_utf8(body.to_vec()).unwrap();
-			// let body = body.replace("E", "É");
+			let mut output = vec![];
+			let mut rewriter = HtmlRewriter::new(
+				Settings {
+					element_content_handlers: vec![element!("link[rel=stylesheet]", |el| {
+						el.set_attribute("is", "cool-stylesheet").unwrap();
+
+						el.after(
+							r#"<script type="module" src="/coolstyleserver/cool-stylesheet.js"></script>"#,
+							ContentType::Html,
+						);
+
+						Ok(())
+					})],
+					..Default::default()
+				},
+				|c: &[u8]| output.extend_from_slice(c),
+			);
+
+			rewriter.write(body.as_bytes()).unwrap();
+			rewriter.end().unwrap();
+			let body = String::from_utf8(output).unwrap();
 
 			headers.remove("content-length");
 

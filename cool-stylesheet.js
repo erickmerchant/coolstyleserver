@@ -4,7 +4,7 @@ class CoolStylesheet extends HTMLLinkElement {
   static {
     let base = new URL(import.meta.url);
 
-    base = base.pathname.substring(0, base.pathname.length - 10);
+    base = base.pathname.substring(0, base.pathname.length - 19);
 
     let esrc = new EventSource(`${base}/changes`);
 
