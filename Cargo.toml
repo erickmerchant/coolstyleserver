@@ -1,0 +1,17 @@
+[package]
+name = "coolstyleserver"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# anyhow = { version = "1.0.70", features = ["backtrace"] }
+axum = "0.6.15"
+lol_html = "1.0.0"
+log = "0.4.17"
+tokio = { version = "1.27.0", features = ["macros", "rt-multi-thread"] }
+tower-http = "0.4.0" 
+hyper = { version = "0.14.27", features = ["client"] }
+
+[profile.release]
+strip = true
+lto = true
