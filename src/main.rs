@@ -1,20 +1,24 @@
 use axum::{
 	extract::{Path, State},
-	http::{uri::Uri, Request, Response},
+	http::{header, uri::Uri, Request},
+	response::{IntoResponse, Response},
 	routing::get,
 	Router,
 };
 use hyper::{client::HttpConnector, http::HeaderValue, Body};
-use std::net::SocketAddr;
+use std::{include_str, net::SocketAddr};
 
 type Client = hyper::client::Client<HttpConnector, Body>;
+
+const COOL_STYLESHEET_JS: &str = include_str!("../cool-stylesheet.js");
 
 #[tokio::main]
 async fn main() {
 	let client = Client::new();
-
+	let cool_api = Router::new().route("/cool-stylesheet.js", get(client_js_handler));
 	let app = Router::new()
 		.route("/", get(root_handler))
+		.nest("/coolstyleserver", cool_api)
 		.route("/*path", get(handler))
 		.with_state(client);
 
@@ -28,6 +32,14 @@ async fn main() {
 
 async fn root_handler(State(client): State<Client>, req: Request<Body>) -> Response<Body> {
 	handler(State(client), Path("/".to_string()), req).await
+}
+
+async fn client_js_handler() -> Response {
+	(
+		[(header::CONTENT_TYPE, "application/javascript".to_string())],
+		COOL_STYLESHEET_JS.to_string(),
+	)
+		.into_response()
 }
 
 async fn handler(
