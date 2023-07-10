@@ -6,14 +6,19 @@ edition = "2021"
 [dependencies]
 # anyhow = { version = "1.0.70", features = ["backtrace"] }
 axum = "0.6.15"
+async-stream = "0.3.5"
 lol_html = "1.0.0"
 log = "0.4.17"
 tokio = { version = "1.27.0", features = ["macros", "rt-multi-thread"] }
 tower-http = "0.4.0" 
 hyper = { version = "0.14.27", features = ["client"] }
 futures = "0.3.28"
-tokio-stream = "0.1.14"
 notify = "6.0.1"
+tokio-stream = "0.1.14"
+serde = "1.0.171"
+serde_json = "1.0.100"
+pathdiff = "0.2.1"
+clap = { version = "4.3.11", features = ["derive"] }
 
 [profile.release]
 strip = true

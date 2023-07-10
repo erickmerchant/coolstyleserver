@@ -6,29 +6,56 @@ use axum::{
 	routing::get,
 	Router,
 };
-use futures::stream::{self, Stream};
+use clap::Parser;
+use futures::stream::Stream;
+use futures::{SinkExt, StreamExt};
 use hyper::{client::HttpConnector, http::HeaderValue, Body};
 use lol_html::{element, html_content::ContentType, HtmlRewriter, Settings};
-use std::{convert::Infallible, include_str, net::SocketAddr, time::Duration};
-use tokio_stream::StreamExt;
+use notify::Watcher;
+use pathdiff::diff_paths;
+use serde_json::json;
+use std::{convert::Infallible, fs::canonicalize, include_str, net::SocketAddr, path, time};
+
+#[derive(Parser, Debug, Clone)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+	#[arg(short, long)]
+	listen: u16,
+	#[arg(short, long)]
+	proxy: String,
+	#[arg(short, long)]
+	watch: String,
+	#[arg(short, long)]
+	base: String,
+}
 
 type Client = hyper::client::Client<HttpConnector, Body>;
 
 const COOL_STYLESHEET_JS: &str = include_str!("../cool-stylesheet.js");
 
+#[derive(Clone)]
+struct AppState {
+	args: Args,
+	client: Client,
+}
+
 #[tokio::main]
 async fn main() {
+	let args = Args::parse();
 	let client = Client::new();
+	let state = AppState {
+		args: args.clone(),
+		client: client.clone(),
+	};
 	let cool_api = Router::new()
 		.route("/cool-stylesheet.js", get(client_js_handler))
 		.route("/changes", get(sse_handler));
 	let app = Router::new()
 		.route("/", get(root_handler))
-		.nest("/coolstyleserver", cool_api)
+		.nest(format!("/{}", state.args.base).as_str(), cool_api)
 		.route("/*path", get(handler))
-		.with_state(client);
-
-	let addr = SocketAddr::from(([127, 0, 0, 1], 4000));
+		.with_state(state);
+	let addr = SocketAddr::from(([0, 0, 0, 0], args.listen));
 	println!("reverse proxy listening on {}", addr);
 	axum::Server::bind(&addr)
 		.serve(app.into_make_service())
@@ -36,8 +63,8 @@ async fn main() {
 		.unwrap();
 }
 
-async fn root_handler(State(client): State<Client>, req: Request<Body>) -> Response<Body> {
-	handler(State(client), Path("/".to_string()), req).await
+async fn root_handler(State(state): State<AppState>, req: Request<Body>) -> Response<Body> {
+	handler(State(state), Path("/".to_string()), req).await
 }
 
 async fn client_js_handler() -> Response {
@@ -48,28 +75,42 @@ async fn client_js_handler() -> Response {
 		.into_response()
 }
 
-async fn sse_handler() -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
-	let stream = stream::repeat_with(|| Event::default().data(r#"{"hrefs":[]}"#))
-		.map(Ok)
-		.throttle(Duration::from_secs(1));
+async fn sse_handler(
+	State(state): State<AppState>,
+) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
+	Sse::new(async_stream::try_stream! {
+		let (mut watcher, mut rx) = async_watcher().unwrap();
+		watcher.watch(path::Path::new(state.args.watch.as_str()), notify::RecursiveMode::Recursive).unwrap();
 
-	// 	let mut watcher = notify::recommended_watcher(|res| {
-	// 		match res {
-	// 			 Ok(event) => println!("event: {:?}", event),
-	// 			 Err(e) => println!("watch error: {:?}", e),
-	// 		}
-	// })?;
-	// watcher.watch(Path::new("."), RecursiveMode::Recursive)?;
+		while let Some(res) = rx.next().await {
+			match res {
+				Ok(event) => {
+					println!("changed: {:?}", event);
+					let hrefs = event.paths.iter().map(|p| {
+						if let Some(p) = diff_paths(p, canonicalize(state.args.watch.as_str()).unwrap()) {
+							Some(format!("/{}", p.to_str().unwrap()))
+						} else {
+							None
+						}
+					}).collect::<Vec<_>>();
 
-	Sse::new(stream).keep_alive(
+					yield Event::default().data(json!({
+						"hrefs": hrefs,
+					}).to_string());
+				},
+				Err(e) => println!("watch error: {:?}", e),
+			}
+		}
+	})
+	.keep_alive(
 		axum::response::sse::KeepAlive::new()
-			.interval(Duration::from_secs(1))
+			.interval(time::Duration::from_secs(10))
 			.text("keep-alive-text"),
 	)
 }
 
 async fn handler(
-	State(client): State<Client>,
+	State(state): State<AppState>,
 	Path(path): Path<String>,
 	mut req: Request<Body>,
 ) -> Response<Body> {
@@ -78,7 +119,7 @@ async fn handler(
 		.path_and_query()
 		.map(|v| v.as_str())
 		.unwrap_or(&path);
-	let uri = format!("http://127.0.0.1:3000{}", path_query);
+	let uri = format!("{}{}", state.args.proxy, path_query);
 
 	println!("{}", uri);
 	*req.uri_mut() = Uri::try_from(uri).unwrap();
@@ -87,7 +128,7 @@ async fn handler(
 		HeaderValue::from_str("identity").unwrap(),
 	);
 
-	let mut res = client.request(req).await.unwrap();
+	let mut res = state.client.request(req).await.unwrap();
 	let mut headers = res.headers_mut().clone();
 
 	if let Some(header) = headers.get("content-type") {
@@ -101,7 +142,10 @@ async fn handler(
 						el.set_attribute("is", "cool-stylesheet").unwrap();
 
 						el.after(
-							r#"<script type="module" src="/coolstyleserver/cool-stylesheet.js"></script>"#,
+							&format!(
+								r#"<script type="module" src="/{}/cool-stylesheet.js"></script>"#,
+								state.args.base
+							),
 							ContentType::Html,
 						);
 
@@ -125,4 +169,24 @@ async fn handler(
 	}
 
 	res
+}
+
+fn async_watcher() -> notify::Result<(
+	notify::RecommendedWatcher,
+	futures::channel::mpsc::Receiver<notify::Result<notify::Event>>,
+)> {
+	let (mut tx, rx) = futures::channel::mpsc::channel(1);
+
+	// Automatically select the best implementation for your platform.
+	// You can also access each implementation directly e.g. INotifyWatcher.
+	let watcher = notify::RecommendedWatcher::new(
+		move |res| {
+			futures::executor::block_on(async {
+				tx.send(res).await.unwrap();
+			})
+		},
+		notify::Config::default(),
+	)?;
+
+	Ok((watcher, rx))
 }
