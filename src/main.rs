@@ -19,13 +19,13 @@ use std::{convert::Infallible, fs::canonicalize, include_str, net::SocketAddr, p
 #[derive(Parser, Debug, Clone)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-	#[arg(short, long)]
+	#[arg(short, long, default_value_t = 4000)]
 	listen: u16,
-	#[arg(short, long)]
+	#[arg(short, long, default_value = "http://0.0.0.0:3000")]
 	proxy: String,
-	#[arg(short, long)]
+	#[arg(short, long, default_value = "./public")]
 	watch: String,
-	#[arg(short, long)]
+	#[arg(short, long, default_value = "coolstyleserver")]
 	base: String,
 }
 
@@ -56,7 +56,6 @@ async fn main() {
 		.route("/*path", get(handler))
 		.with_state(state);
 	let addr = SocketAddr::from(([0, 0, 0, 0], args.listen));
-	println!("reverse proxy listening on {}", addr);
 	axum::Server::bind(&addr)
 		.serve(app.into_make_service())
 		.await
@@ -85,7 +84,6 @@ async fn sse_handler(
 		while let Some(res) = rx.next().await {
 			match res {
 				Ok(event) => {
-					println!("changed: {:?}", event);
 					let hrefs = event.paths.iter().map(|p| {
 						if let Some(p) = diff_paths(p, canonicalize(state.args.watch.as_str()).unwrap()) {
 							Some(format!("/{}", p.to_str().unwrap()))
@@ -121,7 +119,6 @@ async fn handler(
 		.unwrap_or(&path);
 	let uri = format!("{}{}", state.args.proxy, path_query);
 
-	println!("{}", uri);
 	*req.uri_mut() = Uri::try_from(uri).unwrap();
 	req.headers_mut().insert(
 		"accept-encoding",
