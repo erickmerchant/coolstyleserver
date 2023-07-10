@@ -169,9 +169,6 @@ fn async_watcher() -> notify::Result<(
 	futures::channel::mpsc::Receiver<notify::Result<notify::Event>>,
 )> {
 	let (mut tx, rx) = futures::channel::mpsc::channel(1);
-
-	// Automatically select the best implementation for your platform.
-	// You can also access each implementation directly e.g. INotifyWatcher.
 	let watcher = notify::RecommendedWatcher::new(
 		move |res| {
 			futures::executor::block_on(async {
