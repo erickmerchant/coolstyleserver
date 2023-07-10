@@ -85,11 +85,7 @@ async fn sse_handler(
 			match res {
 				Ok(event) => {
 					let hrefs = event.paths.iter().map(|p| {
-						if let Some(p) = diff_paths(p, canonicalize(state.args.watch.as_str()).unwrap()) {
-							Some(format!("/{}", p.to_str().unwrap()))
-						} else {
-							None
-						}
+						diff_paths(p, canonicalize(state.args.watch.as_str()).unwrap()).map(|p| format!("/{}", p.to_str().unwrap()))
 					}).collect::<Vec<_>>();
 
 					yield Event::default().data(json!({
