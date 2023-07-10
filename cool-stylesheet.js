@@ -6,7 +6,7 @@ class CoolStylesheet extends HTMLLinkElement {
 
     base = base.pathname.substring(0, base.pathname.length - 19);
 
-    let esrc = new EventSource(`${base}/changes`);
+    let esrc = new EventSource(`${base}/watch`);
 
     esrc.onmessage = (event) => {
       let data = JSON.parse(event.data);
