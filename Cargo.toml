@@ -2,6 +2,14 @@
 name = "coolstyleserver"
 version = "1.0.0"
 edition = "2021"
+license = "MIT"
+authors = ["Erick Merchant <erickmerchant@gmail.com>"]
+description = "a proxy server for stylesheet hot reloading"
+homepage = "https://github.com/erickmerchant/coolstyleserver"
+documentation = "https://github.com/erickmerchant/coolstyleserver"
+repository = "https://github.com/erickmerchant/coolstyleserver.git"
+readme = "README.md"
+keywords = ["css", "hmr"]
 
 [dependencies]
 anyhow = { version = "1.0.70", features = ["backtrace"] }
