@@ -6,7 +6,7 @@ The way Cool Style Server works is you give it the URL to your dev server using 
 
 ```
 # install with
-deno install --allow-read --allow-net https://deno.land/x/coolstyleserver/coolstyleserver.js
+cargo install coolstyleserver
 
 # then
 coolstyleserver --help
