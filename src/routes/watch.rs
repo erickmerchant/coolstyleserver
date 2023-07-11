@@ -2,8 +2,7 @@ use axum::{
 	extract::State,
 	response::sse::{Event, Sse},
 };
-use futures::stream::Stream;
-use futures::{SinkExt, StreamExt};
+use futures::{stream::Stream, SinkExt, StreamExt};
 use notify::Watcher;
 use pathdiff::diff_paths;
 use serde_json::json;

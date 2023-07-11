@@ -1,4 +1,7 @@
-use axum::{http::header, response::IntoResponse, response::Response};
+use axum::{
+	http::header,
+	response::{IntoResponse, Response},
+};
 use std::include_str;
 
 const COOL_STYLESHEET_JS: &str = include_str!("../../cool-stylesheet.js");
