@@ -10,13 +10,10 @@ pub struct State {
 	pub client: Client,
 }
 
-impl State {
-	pub fn new() -> Self {
+impl Default for State {
+	fn default() -> Self {
 		let args = Args::parse();
 		let client = Client::new();
-		Self {
-			args: args.clone(),
-			client: client.clone(),
-		}
+		Self { args, client }
 	}
 }

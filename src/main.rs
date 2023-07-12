@@ -12,7 +12,7 @@ use std::net::SocketAddr;
 
 #[tokio::main]
 async fn main() {
-	let state = State::new();
+	let state = State::default();
 	let cool_api = Router::new()
 		.route("/cool-stylesheet.js", get(routes::js))
 		.route("/watch", get(routes::watch));
