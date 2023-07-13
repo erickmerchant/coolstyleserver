@@ -1,4 +1,4 @@
-# coolstyleserver
+# Cool Style Server
 
 Cool Style Server is a way to have hot module replacing for CSS when you are not using something like Parcel or Vite. Like say you were working on site with a Java server and you were using Sass to author CSS. It would be nice to have replacing for styles, and it would be a shame to pull in a heavy build tool that's primarily focused on building SPAs. I wrote this initially for my blog which is an Axum app, where I use JS sparingly, but then I realized that it's more broadly useful.
 
