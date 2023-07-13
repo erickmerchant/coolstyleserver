@@ -8,7 +8,7 @@ use pathdiff::diff_paths;
 use serde_json::json;
 use std::{convert::Infallible, fs::canonicalize, path, time};
 
-pub async fn route(
+pub async fn handler(
 	State(state): State<crate::State>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
 	Sse::new(async_stream::try_stream! {

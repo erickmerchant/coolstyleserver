@@ -14,12 +14,12 @@ use std::net::SocketAddr;
 async fn main() {
 	let state = State::default();
 	let cool_api = Router::new()
-		.route("/cool-stylesheet.js", get(js::route))
-		.route("/watch", get(watch::route));
+		.route("/cool-stylesheet.js", get(js::handler))
+		.route("/watch", get(watch::handler));
 	let app = Router::new()
-		.route("/", get(root::route))
+		.route("/", get(root::handler))
 		.nest(format!("/{}", state.args.base).as_str(), cool_api)
-		.route("/*path", get(proxy::route))
+		.route("/*path", get(proxy::handler))
 		.with_state(state.clone());
 	let addr = SocketAddr::from(([0, 0, 0, 0], state.args.listen));
 

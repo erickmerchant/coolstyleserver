@@ -6,9 +6,9 @@ use axum::{
 };
 use hyper::Body;
 
-pub async fn route(
+pub async fn handler(
 	State(state): State<crate::State>,
 	req: Request<Body>,
 ) -> Result<Response<Body>, crate::Error> {
-	proxy::route(State(state), Path("/".to_string()), req).await
+	proxy::handler(State(state), Path("/".to_string()), req).await
 }
