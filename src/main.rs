@@ -3,9 +3,9 @@ mod error;
 mod routes;
 mod state;
 
-pub use args::*;
-pub use error::*;
-pub use state::*;
+use error::*;
+use routes::*;
+use state::*;
 
 use axum::{routing::get, Router};
 use std::net::SocketAddr;
@@ -14,12 +14,12 @@ use std::net::SocketAddr;
 async fn main() {
 	let state = State::default();
 	let cool_api = Router::new()
-		.route("/cool-stylesheet.js", get(routes::js))
-		.route("/watch", get(routes::watch));
+		.route("/cool-stylesheet.js", get(js::route))
+		.route("/watch", get(watch::route));
 	let app = Router::new()
-		.route("/", get(routes::root))
+		.route("/", get(root::route))
 		.nest(format!("/{}", state.args.base).as_str(), cool_api)
-		.route("/*path", get(routes::proxy))
+		.route("/*path", get(proxy::route))
 		.with_state(state.clone());
 	let addr = SocketAddr::from(([0, 0, 0, 0], state.args.listen));
 
