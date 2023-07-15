@@ -29,10 +29,10 @@ pub async fn watch(
 				Ok(event) => {
 					let hrefs = event.paths.iter().map(|p| {
 						let c = canonicalize(state.args.watch.as_str()).expect("path should be valid");
-						
+
 						diff_paths(p, c).map(|p| {
 							let p = p.to_str().expect("path should be a string");
-							
+
 							format!("/{}", p)
 						})
 					}).collect::<Vec<_>>();
