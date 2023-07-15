@@ -25,41 +25,42 @@ pub async fn proxy(
 	let mut res = state.client.request(req).await?;
 	let mut headers = res.headers_mut().clone();
 
-	if let Some(header) = headers.get("content-type") {
-		if header.as_ref().starts_with("text/html".as_bytes()) {
-			let body = hyper::body::to_bytes(res.into_body()).await?;
-			let body = String::from_utf8(body.to_vec())?;
-			let mut output = vec![];
-			let mut rewriter = HtmlRewriter::new(
-				Settings {
-					element_content_handlers: vec![element!("link[rel=stylesheet]", |el| {
-						el.set_attribute("is", "cool-stylesheet")?;
+	if headers
+		.get("content-type")
+		.map_or(false, |h| h.as_ref().starts_with("text/html".as_bytes()))
+	{
+		let body = hyper::body::to_bytes(res.into_body()).await?;
+		let body = String::from_utf8(body.to_vec())?;
+		let mut output = vec![];
+		let mut rewriter = HtmlRewriter::new(
+			Settings {
+				element_content_handlers: vec![element!("link[rel=stylesheet]", |el| {
+					el.set_attribute("is", "cool-stylesheet")?;
 
-						el.after(
-							&format!(
-								r#"<script type="module" src="/{}/cool-stylesheet.js"></script>"#,
-								state.args.base
-							),
-							ContentType::Html,
-						);
+					el.after(
+						&format!(
+							r#"<script type="module" src="/{}/cool-stylesheet.js"></script>"#,
+							state.args.base
+						),
+						ContentType::Html,
+					);
 
-						Ok(())
-					})],
-					..Default::default()
-				},
-				|c: &[u8]| output.extend_from_slice(c),
-			);
+					Ok(())
+				})],
+				..Default::default()
+			},
+			|c: &[u8]| output.extend_from_slice(c),
+		);
 
-			rewriter.write(body.as_bytes())?;
-			rewriter.end()?;
-			let body = String::from_utf8(output)?;
+		rewriter.write(body.as_bytes())?;
+		rewriter.end()?;
+		let body = String::from_utf8(output)?;
 
-			headers.remove("content-length");
+		headers.remove("content-length");
 
-			res = Response::new(Body::from(body));
+		res = Response::new(Body::from(body));
 
-			*res.headers_mut() = headers;
-		}
+		*res.headers_mut() = headers;
 	}
 
 	Ok(res)

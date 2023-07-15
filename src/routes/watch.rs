@@ -28,7 +28,13 @@ pub async fn watch(
 			match res {
 				Ok(event) => {
 					let hrefs = event.paths.iter().map(|p| {
-						diff_paths(p, canonicalize(state.args.watch.as_str()).expect("path should be valid")).map(|p| format!("/{}", p.to_str().expect("path should be a string")))
+						let c = canonicalize(state.args.watch.as_str()).expect("path should be valid");
+						
+						diff_paths(p, c).map(|p| {
+							let p = p.to_str().expect("path should be a string");
+							
+							format!("/{}", p)
+						})
 					}).collect::<Vec<_>>();
 
 					yield Event::default().data(json!({
