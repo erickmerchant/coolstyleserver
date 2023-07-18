@@ -1,28 +1,29 @@
+use async_stream::try_stream;
 use axum::{
 	extract::State,
-	response::sse::{Event, Sse},
+	response::sse::{Event, KeepAlive, Sse},
 };
-use futures::{stream::Stream, SinkExt, StreamExt};
-use notify::Watcher;
+use futures::{channel::mpsc::channel, executor::block_on, stream::Stream, SinkExt, StreamExt};
+use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
 use pathdiff::diff_paths;
 use serde_json::json;
-use std::{convert::Infallible, fs::canonicalize, path, time};
+use std::{convert::Infallible, fs::canonicalize, path, time::Duration};
 
 pub async fn watch(
 	State(state): State<crate::State>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
-	Sse::new(async_stream::try_stream! {
-		let (mut tx, mut rx) = futures::channel::mpsc::channel(1);
-		let mut watcher = notify::RecommendedWatcher::new(
+	Sse::new(try_stream! {
+		let (mut tx, mut rx) = channel(1);
+		let mut watcher = RecommendedWatcher::new(
 			move |res| {
-				futures::executor::block_on(async {
+				block_on(async {
 					tx.send(res).await.expect("should send");
 				})
 			},
-			notify::Config::default(),
+			Config::default(),
 		).expect("watcher should be created");
 
-		watcher.watch(path::Path::new(state.args.watch.as_str()), notify::RecursiveMode::Recursive).expect("watcher should watch");
+		watcher.watch(path::Path::new(state.args.watch.as_str()), RecursiveMode::Recursive).expect("watcher should watch");
 
 		while let Some(res) = rx.next().await {
 			match res {
@@ -46,8 +47,8 @@ pub async fn watch(
 		}
 	})
 	.keep_alive(
-		axum::response::sse::KeepAlive::new()
-			.interval(time::Duration::from_secs(10))
+		KeepAlive::new()
+			.interval(Duration::from_secs(10))
 			.text("keep-alive-text"),
 	)
 }

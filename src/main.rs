@@ -7,7 +7,7 @@ use error::*;
 use routes::{js::*, proxy::*, root::*, watch::*};
 use state::*;
 
-use axum::{routing::get, Router};
+use axum::{routing::get, Router, Server};
 use std::net::SocketAddr;
 
 #[tokio::main]
@@ -23,7 +23,7 @@ async fn main() {
 		.with_state(state.clone());
 	let addr = SocketAddr::from(([0, 0, 0, 0], state.args.listen));
 
-	axum::Server::bind(&addr)
+	Server::bind(&addr)
 		.serve(app.into_make_service())
 		.await
 		.expect("server should start");

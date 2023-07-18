@@ -3,7 +3,7 @@ use axum::{
 	http::{uri::Uri, Request},
 	response::Response,
 };
-use hyper::{header::HeaderValue, Body};
+use hyper::{body::to_bytes, header::HeaderValue, Body};
 use lol_html::{element, html_content::ContentType, HtmlRewriter, Settings};
 
 pub async fn proxy(
@@ -29,7 +29,7 @@ pub async fn proxy(
 		.get("content-type")
 		.map_or(false, |h| h.as_ref().starts_with("text/html".as_bytes()))
 	{
-		let body = hyper::body::to_bytes(res.into_body()).await?;
+		let body = to_bytes(res.into_body()).await?;
 		let body = String::from_utf8(body.to_vec())?;
 		let mut output = vec![];
 		let mut rewriter = HtmlRewriter::new(
