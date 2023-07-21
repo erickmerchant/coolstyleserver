@@ -7,10 +7,10 @@ use futures::{channel::mpsc::channel, executor::block_on, stream::Stream, SinkEx
 use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
 use pathdiff::diff_paths;
 use serde_json::json;
-use std::{convert::Infallible, fs::canonicalize, path, time::Duration};
+use std::{convert::Infallible, fs::canonicalize, path, sync::Arc, time::Duration};
 
 pub async fn watch(
-	State(state): State<crate::State>,
+	State(state): State<Arc<crate::State>>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
 	Sse::new(try_stream! {
 		let (mut tx, mut rx) = channel(1);

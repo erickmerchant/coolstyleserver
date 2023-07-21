@@ -5,9 +5,10 @@ use axum::{
 };
 use hyper::{body::to_bytes, header::HeaderValue, Body};
 use lol_html::{element, html_content::ContentType, HtmlRewriter, Settings};
+use std::sync::Arc;
 
 pub async fn proxy(
-	State(state): State<crate::State>,
+	State(state): State<Arc<crate::State>>,
 	Path(path): Path<String>,
 	mut req: Request<Body>,
 ) -> Result<Response<Body>, crate::Error> {

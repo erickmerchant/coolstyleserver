@@ -5,9 +5,10 @@ use axum::{
 	response::Response,
 };
 use hyper::Body;
+use std::sync::Arc;
 
 pub async fn root(
-	State(state): State<crate::State>,
+	State(state): State<Arc<crate::State>>,
 	req: Request<Body>,
 ) -> Result<Response<Body>, crate::Error> {
 	proxy(State(state), Path("/".to_string()), req).await

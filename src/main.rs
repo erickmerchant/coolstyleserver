@@ -8,11 +8,12 @@ use routes::{js::*, proxy::*, root::*, watch::*};
 use state::*;
 
 use axum::{routing::get, Router, Server};
-use std::net::SocketAddr;
+use std::{net::SocketAddr, sync::Arc};
 
 #[tokio::main]
 async fn main() {
 	let state = State::default();
+	let state = Arc::new(state);
 	let cool_api = Router::new()
 		.route("/cool-stylesheet.js", get(js))
 		.route("/watch", get(watch));
