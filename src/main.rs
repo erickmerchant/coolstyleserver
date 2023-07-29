@@ -3,11 +3,10 @@ mod error;
 mod routes;
 mod state;
 
+use axum::{routing::get, Router, Server};
 use error::*;
 use routes::{js::*, proxy::*, root::*, watch::*};
 use state::*;
-
-use axum::{routing::get, Router, Server};
 use std::{net::SocketAddr, sync::Arc};
 
 #[tokio::main]

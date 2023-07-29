@@ -37,7 +37,6 @@ pub async fn proxy(
 			Settings {
 				element_content_handlers: vec![element!("link[rel=stylesheet]", |el| {
 					el.set_attribute("is", "cool-stylesheet")?;
-
 					el.after(
 						&format!(
 							r#"<script type="module" src="/{}/cool-stylesheet.js"></script>"#,
@@ -55,12 +54,11 @@ pub async fn proxy(
 
 		rewriter.write(body.as_bytes())?;
 		rewriter.end()?;
+
 		let body = String::from_utf8(output)?;
 
 		headers.remove("content-length");
-
 		res = Response::new(Body::from(body));
-
 		*res.headers_mut() = headers;
 	}
 
