@@ -32,7 +32,7 @@ pub async fn proxy(
 	{
 		let body = to_bytes(res.into_body()).await?;
 		let body = String::from_utf8(body.to_vec())?;
-		let mut output = vec![];
+		let mut output = Vec::new();
 		let mut rewriter = HtmlRewriter::new(
 			Settings {
 				element_content_handlers: vec![element!("link[rel=stylesheet]", |el| {
