@@ -3,6 +3,7 @@ use axum::{
 	extract::State,
 	response::sse::{Event, KeepAlive, Sse},
 };
+use camino::Utf8Path;
 use futures::{channel::mpsc::channel, executor::block_on, stream::Stream, SinkExt, StreamExt};
 use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
 use pathdiff::diff_paths;
@@ -33,6 +34,8 @@ pub async fn watch(
 
 						diff_paths(p, c).map(|p| {
 							let p = p.to_str().expect("path should be a string");
+							let base = Utf8Path::new(state.args.style_base.as_str());
+							let p = base.join(p);
 
 							format!("/{}", p)
 						})

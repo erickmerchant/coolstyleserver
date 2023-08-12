@@ -40,7 +40,7 @@ pub async fn proxy(
 					el.after(
 						&format!(
 							r#"<script type="module" src="/{}/cool-stylesheet.js"></script>"#,
-							state.args.base
+							state.args.cool_base
 						),
 						ContentType::Html,
 					);

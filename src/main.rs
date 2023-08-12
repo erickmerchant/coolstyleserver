@@ -18,7 +18,7 @@ async fn main() {
 		.route("/watch", get(watch));
 	let app = Router::new()
 		.route("/", get(root))
-		.nest(format!("/{}", state.args.base).as_str(), cool_api)
+		.nest(format!("/{}", state.args.cool_base).as_str(), cool_api)
 		.route("/*path", get(proxy))
 		.with_state(state.clone());
 	let addr = SocketAddr::from(([0, 0, 0, 0], state.args.listen));

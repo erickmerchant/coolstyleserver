@@ -9,6 +9,8 @@ pub struct Args {
 	pub proxy: String,
 	#[arg(short, long, default_value = "./public")]
 	pub watch: String,
+	#[arg(short, long, default_value = "")]
+	pub style_base: String,
 	#[arg(short, long, default_value = "coolstyleserver")]
-	pub base: String,
+	pub cool_base: String,
 }
