@@ -17,6 +17,7 @@ impl Default for State {
 	fn default() -> Self {
 		let args = Args::parse();
 		let client = AppClient::new();
+
 		Self { args, client }
 	}
 }
