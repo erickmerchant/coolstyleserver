@@ -10,7 +10,7 @@ use pathdiff::diff_paths;
 use serde_json::json;
 use std::{convert::Infallible, fs::canonicalize, path, sync::Arc, time::Duration};
 
-pub async fn watch(
+pub async fn watch_handler(
 	State(state): State<Arc<crate::State>>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
 	Sse::new(try_stream! {

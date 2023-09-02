@@ -1,4 +1,4 @@
-use crate::routes::proxy::*;
+use crate::routes::proxy::proxy_handler;
 use axum::{
 	extract::{Path, State},
 	http::Request,
@@ -7,9 +7,9 @@ use axum::{
 use hyper::Body;
 use std::sync::Arc;
 
-pub async fn root(
+pub async fn root_handler(
 	State(state): State<Arc<crate::State>>,
 	req: Request<Body>,
 ) -> Result<Response<Body>, crate::Error> {
-	proxy(State(state), Path("/".to_string()), req).await
+	proxy_handler(State(state), Path("/".to_string()), req).await
 }
