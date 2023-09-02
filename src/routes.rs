@@ -1,4 +1,4 @@
-pub(crate) mod js;
-pub(crate) mod proxy;
-pub(crate) mod root;
-pub(crate) mod watch;
+pub mod js;
+pub mod proxy;
+pub mod root;
+pub mod watch;
