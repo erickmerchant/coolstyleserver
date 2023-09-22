@@ -1,4 +1,4 @@
-use crate::routes::proxy::proxy_handler;
+use super::proxy::proxy_handler;
 use axum::{
 	extract::{Path, State},
 	http::Request,
