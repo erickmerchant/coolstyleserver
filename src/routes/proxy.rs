@@ -25,6 +25,7 @@ pub async fn proxy_handler(
 
 	let mut res = state.client.request(req).await?;
 	let mut headers = res.headers_mut().clone();
+	let status = res.status();
 
 	if headers
 		.get("content-type")
@@ -60,6 +61,7 @@ pub async fn proxy_handler(
 		headers.remove("content-length");
 		res = Response::new(Body::from(body));
 		*res.headers_mut() = headers;
+		*res.status_mut() = status;
 	}
 
 	Ok(res)
