@@ -69,4 +69,4 @@ class CoolStylesheet extends HTMLLinkElement {
 	}
 }
 
-customElements.define("cool-stylesheet", CoolStylesheet, { extends: "link" });
+customElements.define("cool-stylesheet", CoolStylesheet, {extends: "link"});
