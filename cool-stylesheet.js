@@ -4,21 +4,24 @@ class CoolStylesheet extends HTMLLinkElement {
 	static {
 		let base = new URL(import.meta.url);
 
-		base = base.pathname.substring(0, base.pathname.length - 19);
+		base = base.pathname.substring(0, base.pathname.lastIndexOf("/"));
 
 		let esrc = new EventSource(`${base}/watch`);
 
-		esrc.onmessage = (event) => {
+		esrc.addEventListener("message", async (event) => {
 			let data = JSON.parse(event.data);
+			let updates = [];
 
 			for (let href of data.hrefs) {
 				let nodes = this.#nodes.get(href) ?? [];
 
 				for (let node of nodes) {
-					node?.deref()?.updateStyles(href);
+					updates.push(node?.deref()?.updateStyles(href));
 				}
 			}
-		};
+
+			await Promise.allSettled(updates);
+		});
 	}
 
 	static get observedAttributes() {
@@ -56,16 +59,15 @@ class CoolStylesheet extends HTMLLinkElement {
 		root.adoptedStyleSheets = [...root.adoptedStyleSheets, this.#sheet];
 	}
 
-	updateStyles(href) {
-		fetch(href)
-			.then((res) => res.text())
-			.then((css) => {
-				if (css.includes("@import")) return;
+	async updateStyles(href) {
+		let res = await fetch(href);
+		let css = await res.text();
 
-				this.#sheet.replaceSync(css);
+		if (css.includes("@import")) return;
 
-				this.sheet.disabled = true;
-			});
+		this.#sheet.replaceSync(css);
+
+		this.sheet.disabled = true;
 	}
 }
 
