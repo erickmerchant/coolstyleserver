@@ -3,11 +3,12 @@ mod error;
 mod routes;
 mod state;
 
-use axum::{routing::get, Router, Server};
+use axum::{routing::get, serve, Router};
 use error::Error;
 use routes::{js::js_handler, proxy::proxy_handler, root::root_handler, watch::watch_handler};
 use state::State;
-use std::{net::SocketAddr, sync::Arc};
+use std::sync::Arc;
+use tokio::net::TcpListener;
 
 #[tokio::main]
 async fn main() {
@@ -21,10 +22,11 @@ async fn main() {
 		.nest(format!("/{}", state.args.cool_base).as_str(), cool_api)
 		.route("/*path", get(proxy_handler))
 		.with_state(state.clone());
-	let addr = SocketAddr::from(([0, 0, 0, 0], state.args.listen));
+	let listener = TcpListener::bind(("0.0.0.0", state.args.listen))
+		.await
+		.expect("should listen");
 
-	Server::bind(&addr)
-		.serve(app.into_make_service())
+	serve(listener, app.into_make_service())
 		.await
 		.expect("server should start");
 }

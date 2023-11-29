@@ -1,38 +1,43 @@
 use axum::{
+	body::Body,
 	extract::{Path, State},
-	http::{uri::Uri, Request},
-	response::Response,
+	http::Request,
+	response::{IntoResponse, Response},
 };
-use hyper::{body::to_bytes, header::HeaderValue, Body};
+use http_body_util::{BodyExt, Empty};
+use hyper::header::HeaderValue;
 use lol_html::{element, html_content::ContentType, HtmlRewriter, Settings};
 use std::sync::Arc;
 
 pub async fn proxy_handler(
 	State(state): State<Arc<crate::State>>,
 	Path(path): Path<String>,
-	mut req: Request<Body>,
+	req: Request<Body>,
 ) -> Result<Response<Body>, crate::Error> {
 	let path_query = req
 		.uri()
 		.path_and_query()
 		.map(|v| v.as_str())
 		.unwrap_or(&path);
-	let uri = format!("{}{}", state.args.proxy, path_query);
+	let url = format!("{}{}", state.args.proxy, path_query);
+	let mut req = hyper::Request::builder()
+		.uri(url)
+		.body(Empty::<bytes::Bytes>::new())?;
 
-	*req.uri_mut() = Uri::try_from(uri)?;
 	req.headers_mut()
 		.insert("accept-encoding", HeaderValue::from_str("identity")?);
 
-	let mut res = state.client.request(req).await?;
-	let mut headers = res.headers_mut().clone();
-	let status = res.status();
+	let res = state.client.request(req).await?;
+	let (parts, body) = res.into_parts();
+	let bytes = body.collect().await?.to_bytes();
+	let mut res = Response::from_parts(parts.clone(), Body::from(bytes.clone())).into_response();
+	let mut headers = parts.clone().headers.clone();
+	let status = parts.clone().status;
 
 	if headers
 		.get("content-type")
 		.map_or(false, |h| h.as_ref().starts_with("text/html".as_bytes()))
 	{
-		let body = to_bytes(res.into_body()).await?;
-		let body = String::from_utf8(body.to_vec())?;
 		let mut output = Vec::new();
 		let mut rewriter = HtmlRewriter::new(
 			Settings {
@@ -53,14 +58,14 @@ pub async fn proxy_handler(
 			|c: &[u8]| output.extend_from_slice(c),
 		);
 
-		rewriter.write(body.as_bytes())?;
+		rewriter.write(&bytes)?;
 		rewriter.end()?;
 
 		let body = String::from_utf8(output)?;
 
 		headers.remove("content-length");
-		res = Response::new(Body::from(body));
-		*res.headers_mut() = headers;
+		*res.body_mut() = Body::from(body);
+		*res.headers_mut() = headers.to_owned();
 		*res.status_mut() = status;
 	}
 

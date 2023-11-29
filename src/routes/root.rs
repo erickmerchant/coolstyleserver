@@ -1,10 +1,10 @@
 use super::proxy::proxy_handler;
 use axum::{
+	body::Body,
 	extract::{Path, State},
 	http::Request,
 	response::Response,
 };
-use hyper::Body;
 use std::sync::Arc;
 
 pub async fn root_handler(

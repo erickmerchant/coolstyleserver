@@ -1,6 +1,6 @@
 [package]
 name = "coolstyleserver"
-version = "1.4.4"
+version = "1.5.0"
 edition = "2021"
 license = "MIT"
 authors = ["Erick Merchant <erickmerchant@gmail.com>"]
@@ -13,18 +13,21 @@ keywords = ["css", "hmr"]
 
 [dependencies]
 anyhow = { version = "1.0.70", features = ["backtrace"] }
-axum = "0.6.15"
 async-stream = "0.3.5"
-lol_html = "1.0.0"
-tokio = { version = "1.27.0", features = ["macros", "rt-multi-thread"] }
-hyper = { version = "0.14.27", features = ["client"] }
+axum = "0.7.1"
+bytes = "1.5.0"
+camino = "1.1.6"
+clap = { version = "4.3.11", features = ["derive"] }
 futures = "0.3.28"
+http-body-util = "0.1.0"
+hyper = { version = "1.0.1" }
+hyper-util = { version = "0.1.1", features = ["client-legacy"] }
+lol_html = "1.0.0"
 notify = "6.0.1"
+pathdiff = "0.2.1"
 serde = "1.0.185"
 serde_json = "1.0.100"
-pathdiff = "0.2.1"
-clap = { version = "4.3.11", features = ["derive"] }
-camino = "1.1.6"
+tokio = { version = "1.27.0", features = ["macros", "rt-multi-thread"] }
 
 [profile.release]
 strip = true

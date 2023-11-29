@@ -1,11 +1,9 @@
 use crate::args::Args;
 use clap::Parser;
-use hyper::{
-	client::{Client, HttpConnector},
-	Body,
-};
+use http_body_util::Empty;
+use hyper_util::client::legacy::{connect::HttpConnector, Client};
 
-type AppClient = Client<HttpConnector, Body>;
+type AppClient = Client<HttpConnector, Empty<bytes::Bytes>>;
 
 #[derive(Clone)]
 pub struct State {
@@ -16,7 +14,8 @@ pub struct State {
 impl Default for State {
 	fn default() -> Self {
 		let args = Args::parse();
-		let client = AppClient::new();
+		let client =
+			Client::builder(hyper_util::rt::TokioExecutor::new()).build(HttpConnector::new());
 
 		Self { args, client }
 	}
