@@ -37,7 +37,7 @@ pub async fn watch_handler(
 							let base = Utf8Path::new(state.args.style_base.as_str());
 							let p = base.join(p);
 
-							format!("/{}", p)
+							format!("/{p}")
 						})
 					}).collect::<Vec<_>>();
 
