@@ -29,7 +29,7 @@ pub async fn watch_handler(
 		while let Some(res) = rx.next().await {
 			match res {
 				Ok(event) => {
-					let hrefs = event.paths.iter().map(|p| {
+					let hrefs : Vec<Option<String>> = event.paths.iter().map(|p| {
 						let c = canonicalize(state.args.watch.as_str()).expect("path should be valid");
 
 						diff_paths(p, c).map(|p| {
@@ -39,7 +39,7 @@ pub async fn watch_handler(
 
 							format!("/{p}")
 						})
-					}).collect::<Vec<_>>();
+					}).collect();
 
 					yield Event::default().data(json!({
 						"hrefs": hrefs,
