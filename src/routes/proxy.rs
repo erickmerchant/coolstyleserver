@@ -65,7 +65,7 @@ pub async fn proxy_handler(
 
 		headers.remove("content-length");
 		*res.body_mut() = Body::from(body);
-		*res.headers_mut() = headers.to_owned();
+		*res.headers_mut() = headers;
 		*res.status_mut() = status;
 	}
 
