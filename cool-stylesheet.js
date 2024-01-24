@@ -1,5 +1,5 @@
 class CoolStylesheet extends HTMLLinkElement {
-	static #nodes = new Map();
+	static #sheets = new Map();
 
 	static {
 		let base = new URL(import.meta.url);
@@ -13,10 +13,12 @@ class CoolStylesheet extends HTMLLinkElement {
 			let updates = [];
 
 			for (let href of data.hrefs) {
-				let nodes = this.#nodes.get(href) ?? [];
+				let href_sheets = this.#sheets.get(href);
 
-				for (let node of nodes) {
-					updates.push(node?.deref()?.updateStyles(href));
+				if (!href_sheets) continue;
+
+				for (let sheet of href_sheets.values()) {
+					updates.push(this.#updateSheet(sheet, href));
 				}
 			}
 
@@ -24,50 +26,68 @@ class CoolStylesheet extends HTMLLinkElement {
 		});
 	}
 
-	static get observedAttributes() {
-		return ["media"];
-	}
-
-	#sheet;
-
-	attributeChangedCallback(_, old, value) {
-		if (old) this.#sheet?.media?.deleteMedium(old);
-
-		if (value) this.#sheet?.media?.appendMedium(value);
-	}
-
-	constructor() {
-		super();
-
-		let href = this.getAttribute("href");
-		let map = CoolStylesheet.#nodes.get(href) ?? [];
-		let root = this.getRootNode();
-		let options = {};
-
-		map.push(new WeakRef(this));
-
-		CoolStylesheet.#nodes.set(href, map);
-
-		if (this.hasAttribute("media")) {
-			options.media = this.getAttribute("media");
-		}
-
-		this.#sheet = this.#sheet ?? new CSSStyleSheet(options);
-
-		this.#sheet.replaceSync("");
-
-		root.adoptedStyleSheets = [...root.adoptedStyleSheets, this.#sheet];
-	}
-
-	async updateStyles(href) {
+	static async #updateSheet(sheet, href) {
 		let res = await fetch(href);
 		let css = await res.text();
 
 		if (css.includes("@import")) return;
 
-		this.#sheet.replaceSync(css);
+		sheet.replaceSync(css);
+	}
+
+	static async #getSheet(href, media) {
+		let href_sheets = this.#sheets.get(href) ?? new Map();
+
+		this.#sheets.set(href, href_sheets);
+
+		let sheet = href_sheets.get(media);
+
+		if (!sheet) {
+			sheet = new CSSStyleSheet({media});
+
+			href_sheets.set(media, sheet);
+
+			await this.#updateSheet(sheet, href);
+		}
+
+		return sheet;
+	}
+
+	static get observedAttributes() {
+		return ["media"];
+	}
+
+	constructor() {
+		super();
+
+		this.init();
+	}
+
+	attributeChangedCallback(_, old_media, new_media) {
+		if (old_media === new_media) return;
+
+		this.init().then(async () => {
+			let old_sheet = await CoolStylesheet.#getSheet(
+				this.getAttribute("href"),
+				old_media ?? "screen"
+			);
+			let root = this.getRootNode();
+
+			root.adoptedStyleSheets = [...root.adoptedStyleSheets].filter(
+				(sheet) => sheet !== old_sheet
+			);
+		});
+	}
+
+	async init() {
+		let root = this.getRootNode();
+		let href = this.getAttribute("href");
+		let media = this.getAttribute("media") ?? "screen";
+		let sheet = await CoolStylesheet.#getSheet(href, media);
 
 		this.sheet.disabled = true;
+
+		root.adoptedStyleSheets = [...root.adoptedStyleSheets, sheet];
 	}
 }
 
