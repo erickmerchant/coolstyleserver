@@ -4,15 +4,17 @@ class CoolStylesheet extends HTMLLinkElement {
 	static {
 		let base = new URL(import.meta.url);
 
-		base = base.pathname.substring(0, base.pathname.lastIndexOf("/"));
+		let coolBase = base.pathname.substring(0, base.pathname.lastIndexOf("/"));
 
-		let esrc = new EventSource(`${base}/watch`);
+		let esrc = new EventSource(`${coolBase}/watch`);
 
 		esrc.addEventListener("message", async (event) => {
 			let data = JSON.parse(event.data);
 			let updates = [];
 
 			for (let href of data.hrefs) {
+				href = new URL(href, base).href;
+
 				let href_sheets = this.#sheets.get(href);
 
 				if (!href_sheets) continue;
@@ -68,7 +70,7 @@ class CoolStylesheet extends HTMLLinkElement {
 
 		this.init().then(async () => {
 			let old_sheet = await CoolStylesheet.#getSheet(
-				this.getAttribute("href"),
+				this.href,
 				old_media ?? "screen"
 			);
 			let root = this.getRootNode();
@@ -81,7 +83,7 @@ class CoolStylesheet extends HTMLLinkElement {
 
 	async init() {
 		let root = this.getRootNode();
-		let href = this.getAttribute("href");
+		let href = this.href;
 		let media = this.getAttribute("media") ?? "screen";
 		let sheet = await CoolStylesheet.#getSheet(href, media);
 
