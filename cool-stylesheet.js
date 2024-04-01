@@ -32,7 +32,9 @@ class CoolStylesheet extends HTMLLinkElement {
 		let res = await fetch(href);
 		let css = await res.text();
 
-		if (css.includes("@import")) return;
+		if (css.includes("@import")) {
+			return;
+		}
 
 		sheet.replaceSync(css);
 	}
@@ -66,7 +68,9 @@ class CoolStylesheet extends HTMLLinkElement {
 	}
 
 	attributeChangedCallback(_, old_media, new_media) {
-		if (old_media === new_media) return;
+		if (old_media === new_media) {
+			return;
+		}
 
 		this.init().then(async () => {
 			let old_sheet = await CoolStylesheet.#getSheet(
