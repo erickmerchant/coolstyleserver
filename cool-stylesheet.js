@@ -75,7 +75,7 @@ class CoolStylesheet extends HTMLLinkElement {
 		this.init().then(async () => {
 			let old_sheet = await CoolStylesheet.#getSheet(
 				this.href,
-				old_media ?? "screen"
+				old_media ?? "all"
 			);
 			let root = this.getRootNode();
 
@@ -88,7 +88,7 @@ class CoolStylesheet extends HTMLLinkElement {
 	async init() {
 		let root = this.getRootNode();
 		let href = this.href;
-		let media = this.getAttribute("media") ?? "screen";
+		let media = this.getAttribute("media") ?? "all";
 		let sheet = await CoolStylesheet.#getSheet(href, media);
 
 		this.sheet.disabled = true;
