@@ -3,9 +3,7 @@ class CoolStylesheet extends HTMLLinkElement {
 
 	static {
 		let base = new URL(import.meta.url);
-
 		let coolBase = base.pathname.substring(0, base.pathname.lastIndexOf("/"));
-
 		let esrc = new EventSource(`${coolBase}/watch`);
 
 		esrc.addEventListener("message", async (event) => {
