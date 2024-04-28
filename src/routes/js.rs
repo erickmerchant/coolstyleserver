@@ -8,8 +8,8 @@ const COOL_STYLESHEET_JS: &str = include_str!("../../cool-stylesheet.js");
 
 pub async fn js_handler() -> Response {
 	(
-		[(header::CONTENT_TYPE, "application/javascript".to_string())],
-		COOL_STYLESHEET_JS.to_string(),
+		[(header::CONTENT_TYPE, "application/javascript")],
+		COOL_STYLESHEET_JS,
 	)
 		.into_response()
 }
