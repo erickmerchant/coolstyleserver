@@ -20,9 +20,12 @@ pub async fn proxy_handler(
 		.map(|v| v.as_str())
 		.unwrap_or(&path);
 	let url = format!("{}{}", state.args.proxy, path_query);
+	let original_headers = req.headers();
 	let mut req = hyper::Request::builder()
 		.uri(url)
 		.body(Empty::<bytes::Bytes>::new())?;
+
+	*req.headers_mut() = original_headers.clone();
 
 	req.headers_mut()
 		.insert("accept-encoding", HeaderValue::from_str("identity")?);
