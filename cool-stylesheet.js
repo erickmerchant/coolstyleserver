@@ -1,98 +1,83 @@
+let registry = new Map();
+let base = new URL(import.meta.url);
+let coolBase = base.pathname.substring(0, base.pathname.lastIndexOf("/"));
+let esrc = new EventSource(`${coolBase}/watch`);
+
+esrc.addEventListener("message", async (event) => {
+  let data = JSON.parse(event.data);
+  let updates = [];
+
+  for (let href of data.hrefs) {
+    href = new URL(href, base).href;
+
+    let href_sheets = registry.get(href);
+
+    if (!href_sheets) continue;
+
+    for (let sheet of href_sheets.values()) {
+      updates.push(updateSheet(sheet, href));
+    }
+  }
+
+  await Promise.allSettled(updates);
+});
+
+async function createSheet(root, href, media) {
+  let sheet = new CSSStyleSheet({media: media ?? "all"});
+  let href_sheets = registry.get(href) ?? new Map();
+
+  registry.set(href, href_sheets);
+
+  href_sheets.set(media ?? "all", sheet);
+
+  await updateSheet(sheet, href);
+
+  root.adoptedStyleSheets = [...root.adoptedStyleSheets, sheet];
+}
+
+async function updateSheet(sheet, href) {
+  let res = await fetch(href);
+  let css = await res.text();
+
+  if (css.includes("@import")) {
+    return;
+  }
+
+  sheet.replaceSync(css);
+}
+
 class CoolStylesheet extends HTMLLinkElement {
-	static #sheets = new Map();
+  static get observedAttributes() {
+    return ["media"];
+  }
 
-	static {
-		let base = new URL(import.meta.url);
-		let coolBase = base.pathname.substring(0, base.pathname.lastIndexOf("/"));
-		let esrc = new EventSource(`${coolBase}/watch`);
+  constructor() {
+    super();
 
-		esrc.addEventListener("message", async (event) => {
-			let data = JSON.parse(event.data);
-			let updates = [];
+    let root = this.getRootNode();
+    let media = this.getAttribute("media");
 
-			for (let href of data.hrefs) {
-				href = new URL(href, base).href;
+    createSheet(root, this.href, media).then(() => {
+      this.sheet.disabled = true;
+    });
+  }
 
-				let href_sheets = this.#sheets.get(href);
+  async attributeChangedCallback(_, old_media, new_media) {
+    if (old_media === new_media) {
+      return;
+    }
 
-				if (!href_sheets) continue;
+    let root = this.getRootNode();
 
-				for (let sheet of href_sheets.values()) {
-					updates.push(this.#updateSheet(sheet, href));
-				}
-			}
+    await createSheet(root, this.href, new_media);
 
-			await Promise.allSettled(updates);
-		});
-	}
+    let href_sheets = registry.get(this.href) ?? new Map();
+    let old_sheet = href_sheets.get(old_media ?? "all");
 
-	static async #updateSheet(sheet, href) {
-		let res = await fetch(href);
-		let css = await res.text();
-
-		if (css.includes("@import")) {
-			return;
-		}
-
-		sheet.replaceSync(css);
-	}
-
-	static async #getSheet(href, media) {
-		let href_sheets = this.#sheets.get(href) ?? new Map();
-
-		this.#sheets.set(href, href_sheets);
-
-		let sheet = href_sheets.get(media);
-
-		if (!sheet) {
-			sheet = new CSSStyleSheet({media});
-
-			href_sheets.set(media, sheet);
-
-			await this.#updateSheet(sheet, href);
-		}
-
-		return sheet;
-	}
-
-	static get observedAttributes() {
-		return ["media"];
-	}
-
-	constructor() {
-		super();
-
-		this.init();
-	}
-
-	attributeChangedCallback(_, old_media, new_media) {
-		if (old_media === new_media) {
-			return;
-		}
-
-		this.init().then(async () => {
-			let old_sheet = await CoolStylesheet.#getSheet(
-				this.href,
-				old_media ?? "all"
-			);
-			let root = this.getRootNode();
-
-			root.adoptedStyleSheets = [...root.adoptedStyleSheets].filter(
-				(sheet) => sheet !== old_sheet
-			);
-		});
-	}
-
-	async init() {
-		let root = this.getRootNode();
-		let href = this.href;
-		let media = this.getAttribute("media") ?? "all";
-		let sheet = await CoolStylesheet.#getSheet(href, media);
-
-		this.sheet.disabled = true;
-
-		root.adoptedStyleSheets = [...root.adoptedStyleSheets, sheet];
-	}
+    root.adoptedStyleSheets = [...root.adoptedStyleSheets].filter(
+      (sheet) => sheet !== old_sheet
+    );
+  }
 }
 
 customElements.define("cool-stylesheet", CoolStylesheet, {extends: "link"});
