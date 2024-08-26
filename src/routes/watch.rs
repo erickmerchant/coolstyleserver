@@ -14,11 +14,11 @@ pub async fn watch_handler(
 	State(state): State<Arc<crate::State>>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
 	Sse::new(try_stream! {
-		let (mut tx, mut rx) = channel(1);
+		let (mut sender, mut receiver) = channel(1);
 		let mut watcher = RecommendedWatcher::new(
 			move |res| {
 				block_on(async {
-					tx.send(res).await.expect("should send");
+					sender.send(res).await.expect("should send");
 				})
 			},
 			Config::default(),
@@ -26,7 +26,7 @@ pub async fn watch_handler(
 
 		watcher.watch(path::Path::new(state.args.watch.as_str()), RecursiveMode::Recursive).expect("watcher should watch");
 
-		while let Some(res) = rx.next().await {
+		while let Some(res) = receiver.next().await {
 			match res {
 				Ok(event) => {
 					let hrefs = event.paths.iter().map(|p| {
