@@ -4,7 +4,7 @@ use axum::{
 	http::Request,
 	response::{IntoResponse, Response},
 };
-use http_body_util::{BodyExt, Empty};
+use http_body_util::BodyExt;
 use hyper::header::HeaderValue;
 use lol_html::{element, html_content::ContentType, HtmlRewriter, Settings};
 use std::sync::Arc;
@@ -20,13 +20,10 @@ pub async fn proxy_handler(
 		.map(|v| v.as_str())
 		.unwrap_or(&path);
 	let url = format!("{}{}", state.args.proxy, path_query);
-	let original_headers = req.headers();
-	let mut req = hyper::Request::builder()
-		.uri(url)
-		.body(Empty::<bytes::Bytes>::new())?;
+	let (parts, body) = req.into_parts();
+	let mut req = hyper::Request::from_parts(parts, body);
 
-	*req.headers_mut() = original_headers.clone();
-
+	*req.uri_mut() = url.parse()?;
 	req.headers_mut()
 		.insert("accept-encoding", HeaderValue::from_str("identity")?);
 

@@ -1,9 +1,9 @@
 use crate::args::Args;
+use axum::body::Body;
 use clap::Parser;
-use http_body_util::Empty;
 use hyper_util::client::legacy::{connect::HttpConnector, Client};
 
-type AppClient = Client<HttpConnector, Empty<bytes::Bytes>>;
+type AppClient = Client<HttpConnector, Body>;
 
 #[derive(Clone)]
 pub struct State {
