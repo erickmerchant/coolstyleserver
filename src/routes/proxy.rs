@@ -34,10 +34,9 @@ pub async fn proxy_handler(
 	let (parts, body) = res.into_parts();
 	let bytes = body.collect().await?.to_bytes();
 	let mut res = Response::from_parts(parts.clone(), Body::from(bytes.clone())).into_response();
-	let mut headers = parts.clone().headers.clone();
-	let status = parts.clone().status;
 
-	if headers
+	if res
+		.headers()
 		.get("content-type")
 		.map_or(false, |h| h.as_ref().starts_with("text/html".as_bytes()))
 	{
@@ -66,10 +65,8 @@ pub async fn proxy_handler(
 
 		let body = String::from_utf8(output)?;
 
-		headers.remove("content-length");
+		res.headers_mut().remove("content-length");
 		*res.body_mut() = Body::from(body);
-		*res.headers_mut() = headers;
-		*res.status_mut() = status;
 	}
 
 	Ok(res)

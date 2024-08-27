@@ -7,36 +7,36 @@ esrc.addEventListener("message", async (event) => {
   let data = JSON.parse(event.data);
   let updates = [];
 
-  for (let href of data.hrefs) {
-    href = new URL(href, base).href;
+  for (let pathname of data) {
+    pathname = new URL(pathname, base).pathname;
 
-    let href_sheets = registry.get(href);
+    let sheets = registry.get(pathname);
 
-    if (!href_sheets) continue;
+    if (!sheets) continue;
 
-    for (let sheet of href_sheets.values()) {
-      updates.push(updateSheet(sheet, href));
+    for (let sheet of sheets.values()) {
+      updates.push(updateSheet(sheet, pathname));
     }
   }
 
   await Promise.allSettled(updates);
 });
 
-async function createSheet(root, href, media) {
+async function createSheet(root, pathname, media) {
   let sheet = new CSSStyleSheet({media: media ?? "all"});
-  let href_sheets = registry.get(href) ?? new Map();
+  let sheets = registry.get(pathname) ?? new Map();
 
-  registry.set(href, href_sheets);
+  registry.set(pathname, sheets);
 
-  href_sheets.set(media ?? "all", sheet);
+  sheets.set(media ?? "all", sheet);
 
-  await updateSheet(sheet, href);
+  await updateSheet(sheet, pathname);
 
   root.adoptedStyleSheets = [...root.adoptedStyleSheets, sheet];
 }
 
-async function updateSheet(sheet, href) {
-  let res = await fetch(href);
+async function updateSheet(sheet, pathname) {
+  let res = await fetch(pathname);
   let css = await res.text();
 
   if (css.includes("@import")) {
@@ -51,13 +51,17 @@ class CoolStylesheet extends HTMLLinkElement {
     return ["media"];
   }
 
+  pathname;
+
   constructor() {
     super();
+
+    this.pathname = new URL(this.href).pathname;
 
     let root = this.getRootNode();
     let media = this.getAttribute("media");
 
-    createSheet(root, this.href, media).then(() => {
+    createSheet(root, this.pathname, media).then(() => {
       this.sheet.disabled = true;
     });
   }
@@ -69,10 +73,10 @@ class CoolStylesheet extends HTMLLinkElement {
 
     let root = this.getRootNode();
 
-    await createSheet(root, this.href, new_media);
+    await createSheet(root, this.pathname, new_media);
 
-    let href_sheets = registry.get(this.href) ?? new Map();
-    let old_sheet = href_sheets.get(old_media ?? "all");
+    let sheets = registry.get(this.pathname) ?? new Map();
+    let old_sheet = sheets.get(old_media ?? "all");
 
     root.adoptedStyleSheets = [...root.adoptedStyleSheets].filter(
       (sheet) => sheet !== old_sheet

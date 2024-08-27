@@ -41,9 +41,7 @@ pub async fn watch_handler(
 						})
 					}).collect::<Vec<_>>();
 
-					yield Event::default().data(json!({
-						"hrefs": hrefs,
-					}).to_string());
+					yield Event::default().data(json!(hrefs).to_string());
 				},
 				Err(e) => println!("watch error: {:?}", e),
 			}

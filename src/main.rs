@@ -13,6 +13,7 @@ use tokio::net::TcpListener;
 #[tokio::main]
 async fn main() {
 	let state = State::default();
+	let listen = state.args.listen;
 	let state = Arc::new(state);
 	let cool_api = Router::new()
 		.route("/cool-stylesheet.js", get(js_handler))
@@ -21,8 +22,8 @@ async fn main() {
 		.route("/", get(root_handler))
 		.nest(format!("/{}", state.args.cool_base).as_str(), cool_api)
 		.route("/*path", get(proxy_handler))
-		.with_state(state.clone());
-	let listener = TcpListener::bind(("0.0.0.0", state.args.listen))
+		.with_state(state);
+	let listener = TcpListener::bind(("0.0.0.0", listen))
 		.await
 		.expect("should listen");
 
