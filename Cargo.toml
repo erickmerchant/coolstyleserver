@@ -1,6 +1,6 @@
 [package]
 name = "coolstyleserver"
-version = "1.8.3"
+version = "1.8.4"
 edition = "2021"
 license = "MIT"
 authors = ["Erick Merchant <erickmerchant@gmail.com>"]
@@ -28,6 +28,9 @@ pathdiff = "0.2.1"
 serde = "1.0.185"
 serde_json = "1.0.100"
 tokio = { version = "1.27.0", features = ["macros", "rt-multi-thread"] }
+tower-http = { version = "0.5.2", features = ["trace"] }
+tracing = "0.1.40"
+tracing-subscriber = "0.3.18"
 
 [profile.release]
 strip = true
