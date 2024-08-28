@@ -23,12 +23,15 @@ esrc.addEventListener("message", async (event) => {
 });
 
 async function createSheet(root, pathname, media) {
-  let sheet = new CSSStyleSheet({media: media ?? "all"});
+  media ??= "all";
+
   let sheets = registry.get(pathname) ?? new Map();
 
   registry.set(pathname, sheets);
 
-  sheets.set(media ?? "all", sheet);
+  let sheet = sheets.get(media) ?? new CSSStyleSheet({media: media});
+
+  sheets.set(media, sheet);
 
   await updateSheet(sheet, pathname);
 
