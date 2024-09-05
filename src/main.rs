@@ -5,7 +5,7 @@ mod state;
 
 use axum::{routing::get, serve, Router};
 use error::Error;
-use routes::{js::js_handler, proxy::proxy_handler, root::root_handler, watch::watch_handler};
+use routes::{js::js_handler, proxy::proxy_handler, root::root_handler, watch::watch_handler, fetch::fetch_handler};
 use state::State;
 use std::sync::Arc;
 use tokio::net::TcpListener;
@@ -24,7 +24,8 @@ async fn main() {
 
 	let cool_api = Router::new()
 		.route("/cool-stylesheet.js", get(js_handler))
-		.route("/watch", get(watch_handler));
+		.route("/watch", get(watch_handler))
+		.route("/fetch", get(fetch_handler));
 	let app = Router::new()
 		.route("/", get(root_handler))
 		.nest(format!("/{}", state.args.cool_base).as_str(), cool_api)

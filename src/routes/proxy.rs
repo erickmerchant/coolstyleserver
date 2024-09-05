@@ -1,6 +1,6 @@
 use axum::{
 	body::Body,
-	extract::{Path, State},
+	extract::State,
 	http::Request,
 	response::{IntoResponse, Response},
 };
@@ -8,22 +8,23 @@ use http_body_util::BodyExt;
 use hyper::header::HeaderValue;
 use lol_html::{element, html_content::ContentType, HtmlRewriter, Settings};
 use std::sync::Arc;
+use url::Url;
 
 pub async fn proxy_handler(
 	State(state): State<Arc<crate::State>>,
-	Path(path): Path<String>,
 	req: Request<Body>,
 ) -> Result<Response<Body>, crate::Error> {
-	let path_query = req
+	let path_and_query = req
 		.uri()
 		.path_and_query()
-		.map(|v| v.as_str())
-		.unwrap_or(&path);
-	let url = format!("{}{}", state.args.proxy, path_query);
+		.map(|pq| format!("{pq}").to_string())
+		.unwrap_or("".to_string());
+	let base_url = Url::parse(state.args.proxy.as_str())?;
+	let url = base_url.join(path_and_query.as_str())?;
 	let (parts, body) = req.into_parts();
 	let mut req = hyper::Request::from_parts(parts, body);
 
-	*req.uri_mut() = url.parse()?;
+	*req.uri_mut() = url.to_string().parse()?;
 	req.headers_mut()
 		.insert("accept-encoding", HeaderValue::from_str("identity")?);
 

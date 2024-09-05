@@ -1,4 +1,5 @@
-let registry = new Map();
+let registry = {};
+let sources = {};
 let base = new URL(import.meta.url);
 let coolBase = base.pathname.substring(0, base.pathname.lastIndexOf("/"));
 let esrc = new EventSource(`${coolBase}/watch`);
@@ -10,11 +11,11 @@ esrc.addEventListener("message", async (event) => {
   for (let pathname of data) {
     pathname = new URL(pathname, base).pathname;
 
-    let sheets = registry.get(pathname);
+    let sheets = sources[pathname];
 
     if (!sheets) continue;
 
-    for (let sheet of sheets.values()) {
+    for (let sheet of sheets) {
       updates.push(updateSheet(sheet, pathname));
     }
   }
@@ -25,13 +26,11 @@ esrc.addEventListener("message", async (event) => {
 async function createSheet(root, pathname, media) {
   media ??= "all";
 
-  let sheets = registry.get(pathname) ?? new Map();
+  registry[pathname] ??= {};
 
-  registry.set(pathname, sheets);
+  registry[pathname][media] ??= new CSSStyleSheet({media: media});
 
-  let sheet = sheets.get(media) ?? new CSSStyleSheet({media: media});
-
-  sheets.set(media, sheet);
+  let sheet = registry[pathname][media];
 
   await updateSheet(sheet, pathname);
 
@@ -39,14 +38,24 @@ async function createSheet(root, pathname, media) {
 }
 
 async function updateSheet(sheet, pathname) {
-  let res = await fetch(pathname);
-  let css = await res.text();
+  let url = new URL(`${coolBase}/fetch`, base);
 
-  if (css.includes("@import")) {
+  url.searchParams.append("pathname", pathname);
+
+  let res = await fetch(url);
+  let json = await res.json();
+
+  if (json.css.includes("@import")) {
     return;
   }
 
-  sheet.replaceSync(css);
+  for (let src of [pathname].concat(json.sources ?? [])) {
+    sources[src] ??= new Set();
+
+    sources[src].add(sheet);
+  }
+
+  sheet.replaceSync(json.css);
 }
 
 class CoolStylesheet extends HTMLLinkElement {
@@ -78,8 +87,7 @@ class CoolStylesheet extends HTMLLinkElement {
 
     await createSheet(root, this.pathname, new_media);
 
-    let sheets = registry.get(this.pathname) ?? new Map();
-    let old_sheet = sheets.get(old_media ?? "all");
+    let old_sheet = registry[this.pathname]?.[old_media ?? "all"];
 
     root.adoptedStyleSheets = [...root.adoptedStyleSheets].filter(
       (sheet) => sheet !== old_sheet
