@@ -1,3 +1,4 @@
+use crate::args::Commands;
 use async_stream::try_stream;
 use axum::{
 	extract::State,
@@ -24,13 +25,18 @@ pub async fn watch_handler(
 			Config::default(),
 		).expect("watcher should be created");
 
-		watcher.watch(path::Path::new(state.args.watch.as_str()), RecursiveMode::Recursive).expect("watcher should watch");
+		let directory = match state.args.command.clone() {
+			Commands::Proxy { host: _host, directory } => directory,
+			Commands::Serve { directory } => directory
+		};
+
+		watcher.watch(path::Path::new(directory.as_str()), RecursiveMode::Recursive).expect("watcher should watch");
 
 		while let Some(res) = receiver.next().await {
 			match res {
 				Ok(event) => {
 					let hrefs = event.paths.iter().map(|p| {
-						let c = canonicalize(state.args.watch.as_str()).expect("path should be valid");
+						let c = canonicalize(directory.as_str()).expect("path should be valid");
 
 						diff_paths(p, c).map(|p| {
 							let p = p.to_str().expect("path should be a string");

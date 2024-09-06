@@ -1,4 +1,4 @@
-use super::proxy::proxy_handler;
+use super::fallback::fallback_handler;
 use axum::{
 	extract::{Query, State},
 	http::Request,
@@ -28,7 +28,7 @@ pub async fn fetch_handler(
 
 	*new_req.uri_mut() = params.pathname.parse()?;
 
-	let res = proxy_handler(State(state.clone()), new_req).await?;
+	let res = fallback_handler(State(state.clone()), new_req).await?;
 	let css = String::from_utf8(res.into_body().collect().await?.to_bytes().to_vec())?;
 	let sourcemap = sourcemap::locate_sourcemap_reference(css.as_bytes())?;
 	let url = match sourcemap {
@@ -40,14 +40,14 @@ pub async fn fetch_handler(
 		if let Ok(map) = sourcemap::decode_data_url(url.as_str()) {
 			Some(map)
 		} else {
-			let base_url = Url::parse(state.args.proxy.as_str())?;
+			let base_url = Url::parse(format!("http://0.0.0.0:{}", state.args.port).as_str())?;
 			let base_url = base_url.join(params.pathname.as_str())?;
 			let url = base_url.join(url.as_str())?;
 			let mut new_req = Request::new("".into());
 
 			*new_req.uri_mut() = url.to_string().parse()?;
 
-			let res = proxy_handler(State(state.clone()), new_req).await?;
+			let res = fallback_handler(State(state.clone()), new_req).await?;
 			let map = res.into_body().collect().await?.to_bytes().to_vec();
 			let map = String::from_utf8(map)?;
 
