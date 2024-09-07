@@ -1,10 +1,10 @@
 use super::fallback::fallback_handler;
 use axum::{
+	body::to_bytes,
 	extract::{Query, State},
 	http::Request,
 	Json,
 };
-use http_body_util::BodyExt;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use url::Url;
@@ -29,7 +29,8 @@ pub async fn fetch_handler(
 	*new_req.uri_mut() = params.pathname.parse()?;
 
 	let res = fallback_handler(State(state.clone()), new_req).await?;
-	let css = String::from_utf8(res.into_body().collect().await?.to_bytes().to_vec())?;
+	let bytes = to_bytes(res.into_body(), usize::MAX).await?.to_vec();
+	let css = String::from_utf8(bytes)?;
 	let sourcemap = sourcemap::locate_sourcemap_reference(css.as_bytes())?;
 	let url = match sourcemap {
 		Some(sourcemap::SourceMapRef::Ref(url)) => Some(url),
@@ -48,8 +49,8 @@ pub async fn fetch_handler(
 			*new_req.uri_mut() = url.to_string().parse()?;
 
 			let res = fallback_handler(State(state.clone()), new_req).await?;
-			let map = res.into_body().collect().await?.to_bytes().to_vec();
-			let map = String::from_utf8(map)?;
+			let bytes = to_bytes(res.into_body(), usize::MAX).await?.to_vec();
+			let map = String::from_utf8(bytes)?;
 
 			if let Ok(map) = sourcemap::decode(map.as_bytes()) {
 				Some(map)
