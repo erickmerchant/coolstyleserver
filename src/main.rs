@@ -6,8 +6,7 @@ mod state;
 use axum::{routing::get, serve, Router};
 use error::Error;
 use routes::{
-	fallback::fallback_handler, fetch::fetch_handler, js::js_handler, root::root_handler,
-	watch::watch_handler,
+	fallback::fallback_handler, fetch::fetch_handler, js::js_handler, watch::watch_handler,
 };
 use state::State;
 use std::sync::Arc;
@@ -30,9 +29,8 @@ async fn main() {
 		.route("/watch", get(watch_handler))
 		.route("/fetch", get(fetch_handler));
 	let app = Router::new()
-		.route("/", get(root_handler))
 		.nest(format!("/{}", state.args.cool_base).as_str(), cool_api)
-		.route("/*path", get(fallback_handler))
+		.fallback(get(fallback_handler))
 		.with_state(state)
 		.layer(TraceLayer::new_for_http());
 	let listener = TcpListener::bind(("0.0.0.0", listen))
