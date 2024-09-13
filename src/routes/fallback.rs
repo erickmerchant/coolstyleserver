@@ -82,18 +82,24 @@ pub async fn fallback_handler(
 		let mut output = Vec::new();
 		let mut rewriter = HtmlRewriter::new(
 			Settings {
-				element_content_handlers: vec![element!("link[rel=stylesheet]", |el| {
-					el.set_attribute("is", "cool-stylesheet")?;
-					el.after(
-						&format!(
-							r#"<script type="module" src="/{}/cool-stylesheet.js"></script>"#,
-							state.args.cool_base
-						),
-						ContentType::Html,
-					);
+				element_content_handlers: vec![
+					element!("link[rel=stylesheet]", |el| {
+						el.set_attribute("is", "cool-stylesheet")?;
 
-					Ok(())
-				})],
+						Ok(())
+					}),
+					element!("head", |el| {
+						el.append(
+							&format!(
+								r#"<script type="module" src="/{}/cool-stylesheet.js"></script>"#,
+								state.args.cool_base
+							),
+							ContentType::Html,
+						);
+
+						Ok(())
+					}),
+				],
 				..Default::default()
 			},
 			|c: &[u8]| output.extend_from_slice(c),
