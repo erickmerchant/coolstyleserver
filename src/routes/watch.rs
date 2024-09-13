@@ -35,7 +35,7 @@ pub async fn watch_handler(
 		while let Some(res) = receiver.next().await {
 			match res {
 				Ok(event) => {
-					let hrefs = event.paths.iter().map(|p| {
+					let hrefs : Vec<_> = event.paths.iter().map(|p| {
 						let c = canonicalize(directory.as_str()).expect("path should be valid");
 
 						diff_paths(p, c).map(|p| {
@@ -45,7 +45,7 @@ pub async fn watch_handler(
 
 							format!("/{p}")
 						})
-					}).collect::<Vec<_>>();
+					}).collect();
 
 					yield Event::default().data(json!(hrefs).to_string());
 				},
