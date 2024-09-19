@@ -33,7 +33,7 @@ pub async fn fallback_handler(
 
 			*req.uri_mut() = url.to_string().parse()?;
 			req.headers_mut()
-				.insert("accept-encoding", HeaderValue::from_str("identity")?);
+				.insert(header::ACCEPT_ENCODING, HeaderValue::from_str("identity")?);
 
 			let res = state.client.request(req).await?.into_response();
 
@@ -76,7 +76,7 @@ pub async fn fallback_handler(
 
 	if res
 		.headers()
-		.get("content-type")
+		.get(header::CONTENT_TYPE)
 		.map_or(false, |h| h.as_ref().starts_with("text/html".as_bytes()))
 	{
 		let mut output = Vec::new();
