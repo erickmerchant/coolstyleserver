@@ -57,10 +57,7 @@ pub async fn fallback_handler(
 				if let Ok(body) = fs::read(path) {
 					res = (
 						StatusCode::OK,
-						[(
-							header::CONTENT_TYPE,
-							format!("{content_type}; charset=utf-8"),
-						)],
+						[(header::CONTENT_TYPE, content_type.to_string())],
 						body,
 					)
 						.into_response();
