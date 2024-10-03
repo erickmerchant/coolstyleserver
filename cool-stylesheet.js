@@ -23,7 +23,7 @@ esrc.addEventListener("message", async (event) => {
 	await Promise.allSettled(updates);
 });
 
-async function createSheet(root, pathname, media) {
+async function createSheet(root, index, pathname, media) {
 	media ??= "all";
 
 	registry[pathname] ??= {};
@@ -32,9 +32,9 @@ async function createSheet(root, pathname, media) {
 
 	let sheet = registry[pathname][media];
 
-	await updateSheet(sheet, pathname);
+	root.adoptedStyleSheets.splice(index, 1, sheet);
 
-	root.adoptedStyleSheets = [...root.adoptedStyleSheets, sheet];
+	await updateSheet(sheet, pathname);
 }
 
 async function updateSheet(sheet, pathname) {
@@ -73,7 +73,12 @@ class CoolStylesheet extends HTMLLinkElement {
 		let root = this.getRootNode();
 		let media = this.getAttribute("media");
 
-		createSheet(root, this.pathname, media).then(() => {
+		createSheet(
+			root,
+			root.adoptedStyleSheets.length,
+			this.pathname,
+			media
+		).then(() => {
 			this.sheet.disabled = true;
 		});
 	}
@@ -85,13 +90,10 @@ class CoolStylesheet extends HTMLLinkElement {
 
 		let root = this.getRootNode();
 
-		await createSheet(root, this.pathname, new_media);
-
 		let old_sheet = registry[this.pathname]?.[old_media ?? "all"];
+		let index = root.adoptedStyleSheets.lastIndexOf(old_sheet);
 
-		root.adoptedStyleSheets = [...root.adoptedStyleSheets].filter(
-			(sheet) => sheet !== old_sheet
-		);
+		await createSheet(root, index, this.pathname, new_media);
 	}
 }
 
