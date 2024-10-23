@@ -68,7 +68,11 @@ class CoolStylesheet extends HTMLLinkElement {
 	constructor() {
 		super();
 
-		this.pathname = new URL(this.href).pathname;
+		let url = new URL(this.href);
+
+		if (url.host !== new URL(import.meta.url).host) return;
+
+		this.pathname = url.pathname;
 
 		let root = this.getRootNode();
 		let media = this.getAttribute("media");
