@@ -24,7 +24,7 @@ pub async fn fallback_handler(
 			let path_and_query = req
 				.uri()
 				.path_and_query()
-				.map(|pq| format!("{pq}").to_string())
+				.map(|pq| pq.to_string())
 				.unwrap_or("".to_string());
 			let base_url = Url::parse(host.as_str())?;
 			let url = base_url.join(path_and_query.as_str())?;
