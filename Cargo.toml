@@ -36,3 +36,4 @@ url = "2.5.2"
 [profile.release]
 strip = true
 lto = true
+codegen-units = 1
