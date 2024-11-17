@@ -1,36 +1,38 @@
-let registry = {};
-let sources = {};
+let registry = new Map();
+let sources = new Map();
 let base = new URL(import.meta.url);
 let coolBase = base.pathname.substring(0, base.pathname.lastIndexOf("/"));
 let esrc = new EventSource(`${coolBase}/watch`);
 
 esrc.addEventListener("message", async (event) => {
 	let data = JSON.parse(event.data);
-	let updates = [];
+	let updates = new Set();
 
 	for (let pathname of data) {
 		pathname = new URL(pathname, base).pathname;
 
-		let sheets = sources[pathname];
+		let sheets = sources.get(pathname);
 
 		if (!sheets) continue;
 
 		for (let sheet of sheets) {
-			updates.push(updateSheet(sheet, pathname));
+			updates.add(updateSheet(sheet, pathname));
 		}
 	}
 
-	await Promise.allSettled(updates);
+	await Promise.allSettled([...updates]);
 });
 
 async function createSheet(root, index, pathname, media) {
 	media ??= "all";
 
-	registry[pathname] ??= {};
+	let item = registry.get(pathname) ?? new Map();
 
-	registry[pathname][media] ??= new CSSStyleSheet({media: media});
+	registry.set(pathname, item);
 
-	let sheet = registry[pathname][media];
+	let sheet = item.get(media) ?? new CSSStyleSheet({media: media});
+
+	item.set(media, sheet);
 
 	root.adoptedStyleSheets.splice(index, 1, sheet);
 
@@ -50,9 +52,9 @@ async function updateSheet(sheet, pathname) {
 	}
 
 	for (let src of [pathname].concat(json.sources ?? [])) {
-		sources[src] ??= new Set();
+		sources.set(src, sources.get(src) ?? new Set());
 
-		sources[src].add(sheet);
+		sources.get(src).add(sheet);
 	}
 
 	sheet.replaceSync(json.css);
@@ -94,7 +96,8 @@ class CoolStylesheet extends HTMLLinkElement {
 
 		let root = this.getRootNode();
 
-		let old_sheet = registry[this.pathname]?.[old_media ?? "all"];
+		let old_sheet = registry.get(this.pathname)?.get(old_media ?? "all");
+
 		let index = root.adoptedStyleSheets.lastIndexOf(old_sheet);
 
 		await createSheet(root, index, this.pathname, new_media);
