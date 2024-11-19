@@ -36,7 +36,6 @@ pub async fn fallback_handler(
 				.insert(header::ACCEPT_ENCODING, HeaderValue::from_str("identity")?);
 
 			let res = state.client.request(req).await?.into_response();
-
 			let (parts, body) = res.into_parts();
 
 			(parts, body)

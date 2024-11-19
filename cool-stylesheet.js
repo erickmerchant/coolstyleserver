@@ -95,9 +95,7 @@ class CoolStylesheet extends HTMLLinkElement {
 		}
 
 		let root = this.getRootNode();
-
 		let old_sheet = registry.get(this.pathname)?.get(old_media ?? "all");
-
 		let index = root.adoptedStyleSheets.lastIndexOf(old_sheet);
 
 		await createSheet(root, index, this.pathname, new_media);
