@@ -25,7 +25,7 @@ pub async fn watch_handler(
 			Config::default(),
 		).expect("watcher should be created");
 
-		let directory = match state.args.command.clone() {
+		let directory = match &state.args.command {
 			Commands::Proxy { host: _host, directory } => directory,
 			Commands::Serve { directory } => directory
 		};

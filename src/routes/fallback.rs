@@ -16,7 +16,7 @@ pub async fn fallback_handler(
 	State(state): State<Arc<crate::State>>,
 	req: Request<Body>,
 ) -> Result<Response<Body>, crate::Error> {
-	let (parts, body) = match state.args.command.clone() {
+	let (parts, body) = match &state.args.command {
 		Commands::Proxy {
 			host,
 			directory: _directory,
@@ -68,7 +68,7 @@ pub async fn fallback_handler(
 	};
 
 	let bytes = to_bytes(body, usize::MAX).await?;
-	let mut res = Response::from_parts(parts.clone(), Body::from(bytes.clone())).into_response();
+	let mut res = Response::from_parts(parts, Body::from(bytes.to_owned())).into_response();
 
 	if res
 		.headers()
