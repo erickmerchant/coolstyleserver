@@ -75,7 +75,7 @@ pub async fn fallback_handler(
 		.get(header::CONTENT_TYPE)
 		.map_or(false, |h| h.as_ref().starts_with("text/html".as_bytes()))
 	{
-		let mut output = Vec::new();
+		let mut output = vec![];
 		let mut rewriter = HtmlRewriter::new(
 			Settings {
 				element_content_handlers: vec![
