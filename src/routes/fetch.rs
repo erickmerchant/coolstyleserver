@@ -59,7 +59,7 @@ pub async fn fetch_handler(
 	};
 	let sources = match map {
 		Some(sourcemap::DecodedMap::Regular(map)) => map.sources().map(|s| s.to_string()).collect(),
-		_ => vec![],
+		_ => Vec::new(),
 	};
 
 	let json = Payload { css, sources };

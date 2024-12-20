@@ -75,10 +75,10 @@ pub async fn fallback_handler(
 		.get(header::CONTENT_TYPE)
 		.map_or(false, |h| h.as_ref().starts_with("text/html".as_bytes()))
 	{
-		let mut output = vec![];
+		let mut output = Vec::new();
 		let mut rewriter = HtmlRewriter::new(
 			Settings {
-				element_content_handlers: vec![
+				element_content_handlers: [
 					element!("link[rel=stylesheet]", |el| {
 						el.set_attribute("is", "cool-stylesheet")?;
 
@@ -95,7 +95,8 @@ pub async fn fallback_handler(
 
 						Ok(())
 					}),
-				],
+				]
+				.into(),
 				..Default::default()
 			},
 			|c: &[u8]| output.extend_from_slice(c),
