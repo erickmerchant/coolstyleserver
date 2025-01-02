@@ -1,6 +1,6 @@
 [package]
 name = "coolstyleserver"
-version = "2.4.5"
+version = "2.5.0"
 edition = "2021"
 license = "MIT"
 authors = ["Erick Merchant <erickmerchant@gmail.com>"]
@@ -14,7 +14,7 @@ keywords = ["css", "hmr"]
 [dependencies]
 anyhow = { version = "1.0.70", features = ["backtrace"] }
 async-stream = "0.3.5"
-axum = "0.7.1"
+axum = "0.8.1"
 camino = "1.1.6"
 clap = { version = "4.3.11", features = ["derive"] }
 futures = "0.3.28"
