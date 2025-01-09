@@ -1,6 +1,6 @@
 # Cool Style Server
 
-Cool Style Server is a development serve that reloads stylesheets in the browser when the underlying source files change without doing a full page refresh, and without using a JavaScript bundler. It is essentially "hot module replacement" for CSS.
+Cool Style Server is a development server that reloads stylesheets in the browser when the underlying source files change without doing a full page refresh, and without using a JavaScript bundler. It is essentially "hot module replacement" for CSS.
 
 ## Why
 
