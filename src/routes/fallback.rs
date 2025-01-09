@@ -73,7 +73,7 @@ pub async fn fallback_handler(
 	if res
 		.headers()
 		.get(header::CONTENT_TYPE)
-		.map_or(false, |h| h.as_ref().starts_with("text/html".as_bytes()))
+		.is_some_and(|h| h.as_ref().starts_with("text/html".as_bytes()))
 	{
 		let mut output = Vec::new();
 		let mut rewriter = HtmlRewriter::new(
