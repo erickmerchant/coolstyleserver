@@ -85,7 +85,7 @@ class CoolStylesheet extends HTMLLinkElement {
 			this.pathname,
 			media
 		).then(() => {
-			this.sheet.disabled = true;
+			this.disabled = true;
 		});
 	}
 
