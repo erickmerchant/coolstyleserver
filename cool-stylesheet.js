@@ -66,10 +66,10 @@ class CoolStylesheet extends HTMLLinkElement {
 	}
 
 	pathname;
-	root = new WeakRef(this.getRootNode());
+	root;
 
-	constructor() {
-		super();
+	connectedCallback() {
+		this.root = new WeakRef(this.getRootNode());
 
 		let url = new URL(this.href);
 
