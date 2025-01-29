@@ -1,6 +1,6 @@
 [package]
 name = "coolstyleserver"
-version = "2.6.7"
+version = "2.7.0"
 edition = "2021"
 license = "MIT"
 authors = ["Erick Merchant <erickmerchant@gmail.com>"]

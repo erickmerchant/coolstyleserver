@@ -23,7 +23,7 @@ esrc.addEventListener("message", async (event) => {
 	await Promise.allSettled([...updates]);
 });
 
-async function createSheet(root, index, pathname, media) {
+async function getOrCreatSheet(root, index, pathname, media) {
 	media ??= "all";
 
 	let item = registry.get(pathname) ?? new Map();
@@ -36,7 +36,7 @@ async function createSheet(root, index, pathname, media) {
 
 	root.adoptedStyleSheets.splice(index, 1, sheet);
 
-	await updateSheet(sheet, pathname);
+	return sheet;
 }
 
 async function updateSheet(sheet, pathname) {
@@ -66,6 +66,7 @@ class CoolStylesheet extends HTMLLinkElement {
 	}
 
 	pathname;
+	root = new WeakRef(this.getRootNode());
 
 	constructor() {
 		super();
@@ -76,15 +77,16 @@ class CoolStylesheet extends HTMLLinkElement {
 
 		this.pathname = url.pathname;
 
-		let root = this.getRootNode();
 		let media = this.getAttribute("media");
 
-		createSheet(
-			root,
-			root.adoptedStyleSheets.length,
+		getOrCreatSheet(
+			this.root.deref(),
+			this.root.deref().adoptedStyleSheets.length,
 			this.pathname,
 			media
-		).then(() => {
+		).then(async (sheet) => {
+			await updateSheet(sheet, this.pathname);
+
 			this.disabled = true;
 		});
 	}
@@ -94,11 +96,25 @@ class CoolStylesheet extends HTMLLinkElement {
 			return;
 		}
 
-		let root = this.getRootNode();
 		let old_sheet = registry.get(this.pathname)?.get(old_media ?? "all");
-		let index = root.adoptedStyleSheets.lastIndexOf(old_sheet);
+		let index = this.root.deref().adoptedStyleSheets.lastIndexOf(old_sheet);
 
-		await createSheet(root, index, this.pathname, new_media);
+		let sheet = await getOrCreatSheet(
+			this.root.deref(),
+			index,
+			this.pathname,
+			new_media
+		);
+
+		await updateSheet(sheet, this.pathname);
+	}
+
+	disconnectedCallback() {
+		let media = this.getAttribute("media");
+		let sheet = registry.get(this.pathname)?.get(media ?? "all");
+		let index = this.root.deref().adoptedStyleSheets.lastIndexOf(sheet);
+
+		this.root.deref().adoptedStyleSheets.splice(index, 1);
 	}
 }
 
