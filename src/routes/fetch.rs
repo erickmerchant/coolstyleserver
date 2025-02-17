@@ -48,11 +48,7 @@ pub async fn fetch_handler(
 				let bytes = to_bytes(res.into_body(), usize::MAX).await?.to_vec();
 				let map = String::from_utf8(bytes)?;
 
-				if let Ok(map) = sourcemap::decode(map.as_bytes()) {
-					Some(map)
-				} else {
-					None
-				}
+				sourcemap::decode(map.as_bytes()).ok()
 			}
 		}
 		_ => None,

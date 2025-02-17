@@ -50,17 +50,17 @@ pub async fn fallback_handler(
 				path.push("index.html");
 			}
 
-			let mut res = StatusCode::NOT_FOUND.into_response();
-
-			if let Some(content_type) = mime_guess::from_path(&path).first() {
-				if let Ok(body) = fs::read(path) {
-					res = (
-						StatusCode::OK,
-						[(header::CONTENT_TYPE, content_type.to_string())],
-						body,
-					)
-						.into_response();
-				}
+			let res = if let (Some(content_type), Ok(body)) =
+				(mime_guess::from_path(&path).first(), fs::read(path))
+			{
+				(
+					StatusCode::OK,
+					[(header::CONTENT_TYPE, content_type.to_string())],
+					body,
+				)
+					.into_response()
+			} else {
+				StatusCode::NOT_FOUND.into_response()
 			};
 
 			res.into_parts()
