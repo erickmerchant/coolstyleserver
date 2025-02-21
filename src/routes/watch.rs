@@ -49,7 +49,7 @@ pub async fn watch_handler(
 
 					yield Event::default().data(json!(hrefs).to_string());
 				},
-				Err(e) => println!("watch error: {:?}", e),
+				Err(e) => eprintln!("watch error: {:?}", e),
 			}
 		}
 	})
