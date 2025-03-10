@@ -59,9 +59,9 @@ class CoolStylesheet extends HTMLLinkElement {
 			this.stylesheet
 		);
 
-		this.update();
-
-		this.disabled = true;
+		this.update().then(() => {
+			this.disabled = true;
+		});
 	}
 
 	async attributeChangedCallback(_, old_media, new_media) {
