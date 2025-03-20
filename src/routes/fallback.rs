@@ -47,7 +47,7 @@ pub async fn fallback_handler(
 				path.push("index.html");
 			}
 
-			let res = if let (Some(content_type), Ok(body)) =
+			if let (Some(content_type), Ok(body)) =
 				(mime_guess::from_path(&path).first(), fs::read(path))
 			{
 				(
@@ -58,9 +58,7 @@ pub async fn fallback_handler(
 					.into_response()
 			} else {
 				StatusCode::NOT_FOUND.into_response()
-			};
-
-			res
+			}
 		}
 	};
 
