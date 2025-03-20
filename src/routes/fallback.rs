@@ -16,7 +16,7 @@ pub async fn fallback_handler(
 	State(state): State<Arc<crate::State>>,
 	req: Request<Body>,
 ) -> Result<Response<Body>, crate::Error> {
-	let (parts, body) = match &state.args.command {
+	let res = match &state.args.command {
 		Commands::Proxy {
 			host,
 			directory: _directory,
@@ -35,10 +35,7 @@ pub async fn fallback_handler(
 			req.headers_mut()
 				.insert(header::ACCEPT_ENCODING, HeaderValue::from_str("identity")?);
 
-			let res = state.client.request(req).await?.into_response();
-			let (parts, body) = res.into_parts();
-
-			(parts, body)
+			state.client.request(req).await?.into_response()
 		}
 		Commands::Serve { directory } => {
 			let path = req.uri().path();
@@ -63,10 +60,11 @@ pub async fn fallback_handler(
 				StatusCode::NOT_FOUND.into_response()
 			};
 
-			res.into_parts()
+			res
 		}
 	};
 
+	let (parts, body) = res.into_parts();
 	let bytes = to_bytes(body, usize::MAX).await?;
 	let mut res = Response::from_parts(parts, Body::from(bytes.to_owned())).into_response();
 
