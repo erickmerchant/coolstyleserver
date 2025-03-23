@@ -12,6 +12,7 @@ use state::State;
 use std::sync::Arc;
 use tokio::net::TcpListener;
 use tower_http::trace::TraceLayer;
+use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
 async fn main() {
@@ -20,8 +21,7 @@ async fn main() {
 	let state = Arc::new(state);
 
 	tracing_subscriber::fmt()
-		.compact()
-		.with_max_level(tracing::Level::DEBUG)
+		.with_env_filter(EnvFilter::try_from_default_env().unwrap_or_default())
 		.init();
 
 	let cool_api = Router::new()
