@@ -287,7 +287,7 @@ checksum = "6245d59a3e82a7fc217c5828a6692dbc6dfb63a0c8c90495621f7b9d79704a0e"
 
 [[package]]
 name = "coolstyleserver"
-version = "2.9.5"
+version = "2.9.6"
 dependencies = [
  "anyhow",
  "async-fn-stream",

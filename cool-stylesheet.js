@@ -35,14 +35,19 @@ class CoolStylesheet extends HTMLLinkElement {
 
 		this.pathname = url.pathname;
 
-		esrc.addEventListener("message", async (event) => {
+		esrc.addEventListener("message", (event) => {
 			let data = JSON.parse(event.data);
+			let doUpdate = false;
 
 			for (let pathname of data) {
 				pathname = new URL(pathname, base).pathname;
 
 				if (pathname !== this.pathname && !this.sources.has(pathname)) continue;
 
+				doUpdate = true;
+			}
+
+			if (doUpdate) {
 				this.update();
 			}
 		});
@@ -64,7 +69,7 @@ class CoolStylesheet extends HTMLLinkElement {
 		});
 	}
 
-	async attributeChangedCallback(_, old_media, new_media) {
+	attributeChangedCallback(_, old_media, new_media) {
 		if (old_media === new_media) {
 			return;
 		}
