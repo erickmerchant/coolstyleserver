@@ -61,7 +61,6 @@ pub async fn fallback_handler(
 			}
 		}
 	};
-
 	let (parts, body) = res.into_parts();
 	let bytes = to_bytes(body, usize::MAX).await?;
 	let mut res = Response::from_parts(parts, Body::from(bytes.to_owned())).into_response();

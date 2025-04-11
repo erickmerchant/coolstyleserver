@@ -51,7 +51,6 @@ class CoolStylesheet extends HTMLLinkElement {
 				this.update();
 			}
 		});
-
 		let media = this.getAttribute("media") ?? "all";
 
 		this.stylesheet = new CSSStyleSheet({media: media});
