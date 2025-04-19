@@ -41,18 +41,15 @@ define("cool-stylesheet")
 
 		$(esrc).on("message", (event) => {
 			let data = JSON.parse(event.data);
-			let doUpdate = false;
 
 			for (let p of data) {
 				p = new URL(p, base).pathname;
 
-				if (p !== pathname && !sources.has(p)) continue;
+				if (p === pathname || sources.has(p)) {
+					update();
 
-				doUpdate = true;
-			}
-
-			if (doUpdate) {
-				update();
+					break;
+				}
 			}
 		});
 
