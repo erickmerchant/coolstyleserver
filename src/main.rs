@@ -6,7 +6,7 @@ mod state;
 use axum::{routing::get, serve, Router};
 use error::Error;
 use routes::{
-	fallback::fallback_handler, fetch::fetch_handler, js::js_handler, watch::watch_handler,
+	fallback::fallback_handler, fetch::fetch_handler, public::public_handler, watch::watch_handler,
 };
 use state::State;
 use std::sync::Arc;
@@ -25,9 +25,9 @@ async fn main() {
 		.init();
 
 	let cool_api = Router::new()
-		.route("/cool-stylesheet.js", get(js_handler))
 		.route("/watch", get(watch_handler))
-		.route("/fetch", get(fetch_handler));
+		.route("/fetch", get(fetch_handler))
+		.route("/{*path}", get(public_handler));
 	let app = Router::new()
 		.nest(format!("/{}", state.args.cool_base).as_str(), cool_api)
 		.fallback(get(fallback_handler))

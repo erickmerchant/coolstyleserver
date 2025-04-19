@@ -1,4 +1,4 @@
 pub mod fallback;
 pub mod fetch;
-pub mod js;
+pub mod public;
 pub mod watch;
