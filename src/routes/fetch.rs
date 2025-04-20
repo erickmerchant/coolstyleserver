@@ -1,18 +1,13 @@
 use super::fallback::fallback_handler;
 use axum::{
 	body::to_bytes,
-	extract::{Query, State},
+	extract::{Path, State},
 	http::Request,
 	Json,
 };
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::sync::Arc;
 use url::Url;
-
-#[derive(Deserialize)]
-pub struct Params {
-	pub pathname: String,
-}
 
 #[derive(Serialize)]
 pub struct Payload {
@@ -22,11 +17,11 @@ pub struct Payload {
 
 pub async fn fetch_handler(
 	State(state): State<Arc<crate::State>>,
-	params: Query<Params>,
+	Path(path): Path<String>,
 ) -> Result<Json<Payload>, crate::Error> {
 	let mut new_req = Request::new("".into());
 
-	*new_req.uri_mut() = params.pathname.parse()?;
+	*new_req.uri_mut() = ("/".to_owned() + path.as_str()).parse()?;
 
 	let res = fallback_handler(State(state.clone()), new_req).await?;
 	let bytes = to_bytes(res.into_body(), usize::MAX).await?.to_vec();
@@ -38,7 +33,7 @@ pub async fn fetch_handler(
 				Some(map)
 			} else {
 				let base_url = Url::parse(format!("http://0.0.0.0:{}", state.args.port).as_str())?;
-				let base_url = base_url.join(params.pathname.as_str())?;
+				let base_url = base_url.join(path.as_str())?;
 				let url = base_url.join(url.as_str())?;
 				let mut new_req = Request::new("".into());
 

@@ -26,7 +26,7 @@ async fn main() {
 
 	let cool_api = Router::new()
 		.route("/watch", get(watch_handler))
-		.route("/fetch", get(fetch_handler))
+		.route("/fetch/{*path}", get(fetch_handler))
 		.route("/{*path}", get(public_handler));
 	let app = Router::new()
 		.nest(format!("/{}", state.args.cool_base).as_str(), cool_api)
