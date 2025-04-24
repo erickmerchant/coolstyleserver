@@ -63,7 +63,7 @@ pub async fn watch_handler(
 						.emit(Event::default().data(json!(hrefs).to_string()))
 						.await
 				}
-				Err(e) => eprintln!("watch error: {:?}", e),
+				Err(e) => eprintln!("watch error: {e:?}"),
 			}
 		}
 
