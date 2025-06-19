@@ -10,6 +10,7 @@ documentation = "https://github.com/erickmerchant/coolstyleserver"
 repository = "https://github.com/erickmerchant/coolstyleserver.git"
 readme = "README.md"
 keywords = ["css", "hmr"]
+include = ["/dist"]
 
 [dependencies]
 anyhow = { version = "1.0.70", features = ["backtrace"] }
