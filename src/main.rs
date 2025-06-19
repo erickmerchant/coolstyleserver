@@ -6,12 +6,12 @@ mod state;
 use axum::{routing::get, serve, Router};
 use error::Error;
 use routes::{
-	fallback::fallback_handler, fetch::fetch_handler, public::public_handler, watch::watch_handler,
+	dist::dist_handler, fallback::fallback_handler, fetch::fetch_handler, watch::watch_handler,
 };
 use state::State;
 use std::sync::Arc;
 use tokio::net::TcpListener;
-use tower_http::trace::TraceLayer;
+use tower_http::{compression::CompressionLayer, trace::TraceLayer};
 use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
@@ -27,11 +27,12 @@ async fn main() {
 	let cool_api = Router::new()
 		.route("/watch", get(watch_handler))
 		.route("/fetch/{*path}", get(fetch_handler))
-		.route("/{*path}", get(public_handler));
+		.route("/{*path}", get(dist_handler));
 	let app = Router::new()
 		.nest(format!("/{}", state.args.cool_base).as_str(), cool_api)
 		.fallback(get(fallback_handler))
 		.with_state(state)
+		.layer(CompressionLayer::new())
 		.layer(TraceLayer::new_for_http());
 	let listener = TcpListener::bind(("0.0.0.0", listen))
 		.await

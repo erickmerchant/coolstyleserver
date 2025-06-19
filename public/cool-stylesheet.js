@@ -1,10 +1,10 @@
-import "./handcraft/dom/css.js";
-import "./handcraft/dom/observe.js";
-import "./handcraft/dom/on.js";
-import "./handcraft/dom/prop.js";
-import {$} from "./handcraft/dom.js";
-import {define} from "./handcraft/define.js";
-import {watch} from "./handcraft/reactivity.js";
+import "handcraft/dom/css.js";
+import "handcraft/dom/attr.js";
+import "handcraft/dom/on.js";
+import "handcraft/dom/prop.js";
+import {$} from "handcraft/dom.js";
+import {define} from "handcraft/define.js";
+import {watch} from "handcraft/reactivity.js";
 
 let base = new URL(import.meta.url);
 let coolBase = base.pathname.substring(0, base.pathname.lastIndexOf("/"));
@@ -19,7 +19,6 @@ define("cool-stylesheet")
 
 		let pathname = url.pathname;
 		let state = watch({updated: false, css: ""});
-		let observed = el.observe();
 		let sources = new Set();
 		let fetchUrl = new URL(`${coolBase}/fetch${pathname}`, base);
 
@@ -54,7 +53,7 @@ define("cool-stylesheet")
 
 		el.prop("disabled", () => state.updated);
 
-		el.root().css(() => state.css, {media: () => observed.attr("media")});
+		el.root().css(() => state.css, {media: () => el.attr("media")});
 
 		update();
 	});
