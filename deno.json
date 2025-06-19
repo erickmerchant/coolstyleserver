@@ -1,7 +1,7 @@
 {
 	"tasks": {
 		"publish": {
-			"command": "cargo publish",
+			"command": "cargo publish --allow-dirty",
 			"dependencies": ["js"]
 		},
 		"js": "rollup -p @rollup/plugin-node-resolve public/cool-stylesheet.js | terser -o dist/cool-stylesheet.js"
