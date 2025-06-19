@@ -1,4 +1,5 @@
 import "handcraft/dom/css.js";
+import "handcraft/dom/observer.js";
 import "handcraft/dom/attr.js";
 import "handcraft/dom/on.js";
 import "handcraft/dom/prop.js";
