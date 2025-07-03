@@ -2,7 +2,7 @@
   "version": "5",
   "specifiers": {
     "npm:@rollup/plugin-node-resolve@^16.0.1": "16.0.1_rollup@4.44.1",
-    "npm:handcraft@next": "0.17.0-beta.17",
+    "npm:handcraft@next": "0.17.0-beta.18",
     "npm:rollup@^4.43.0": "4.44.1",
     "npm:terser@^5.43.0": "5.43.1"
   },
@@ -190,8 +190,8 @@
     "function-bind@1.1.2": {
       "integrity": "sha512-7XHNxH7qX9xG5mIwxkhumTox/MIRNcOgDrxWsMt2pAr23WHp6MrRlN7FBSFpCpr+oVO0F744iUgR82nJMfG2SA=="
     },
-    "handcraft@0.17.0-beta.17": {
-      "integrity": "sha512-dVKNMwt5ev97iawCC+2qOBp89U7kkHltC3v3XFNiMHPMNeRMttGfPbctHOsJu7gik56X0Exsx9yFarjEG66fBQ=="
+    "handcraft@0.17.0-beta.18": {
+      "integrity": "sha512-6UHJWbLEmCC8gxBkKmj48n7eUKeXSOgIwwdnq9/+BFAeHqRBr1q141MwX11UFcsnYVnCyoeCe/W6zP2X6oXdeQ=="
     },
     "hasown@2.0.2": {
       "integrity": "sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==",
