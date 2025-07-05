@@ -13,7 +13,7 @@ let esrc = new EventSource(`${coolBase}/watch`);
 
 define("cool-stylesheet")
 	.extends("link")
-	.connected((el) => {
+	.setup((el) => {
 		let url = new URL(el.deref().href);
 
 		if (url.host !== base.host) return;
