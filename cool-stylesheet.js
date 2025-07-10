@@ -11,6 +11,20 @@ let base = new URL(import.meta.url);
 let coolBase = base.pathname.substring(0, base.pathname.lastIndexOf("/"));
 let esrc = new EventSource(`${coolBase}/watch`);
 
+$(esrc).on("message", (e) => {
+	let data = JSON.parse(e.data);
+
+	for (let {contentType} of data) {
+		if (contentType === "text/css") continue;
+
+		window.location.reload();
+
+		e.stopPropagation();
+
+		break;
+	}
+});
+
 define("cool-stylesheet")
 	.extends("link")
 	.setup((el) => {
@@ -38,13 +52,15 @@ define("cool-stylesheet")
 			state.updated = true;
 		};
 
-		$(esrc).on("message", (event) => {
-			let data = JSON.parse(event.data);
+		$(esrc).on("message", (e) => {
+			let data = JSON.parse(e.data);
 
-			for (let p of data) {
-				p = new URL(p, base).pathname;
+			console.log(data);
 
-				if (p === pathname || sources.has(p)) {
+			for (let {href} of data) {
+				href = new URL(href, base).pathname;
+
+				if (href === pathname || sources.has(href)) {
 					update();
 
 					break;

@@ -2,11 +2,9 @@
   "version": "5",
   "specifiers": {
     "npm:@rollup/plugin-node-resolve@^16.0.1": "16.0.1_rollup@4.44.2",
+    "npm:@rollup/plugin-terser@~0.4.4": "0.4.4_rollup@4.44.2",
     "npm:handcraft@next": "0.17.0-beta.19",
-    "npm:rollup@4.44.2": "4.44.2",
-    "npm:rollup@^4.43.0": "4.44.2",
-    "npm:terser@5.43.1": "5.43.1",
-    "npm:terser@^5.43.0": "5.43.1"
+    "npm:rollup@^4.44.2": "4.44.2"
   },
   "npm": {
     "@jridgewell/gen-mapping@0.3.12": {
@@ -45,6 +43,18 @@
         "is-module",
         "resolve",
         "rollup"
+      ],
+      "optionalPeers": [
+        "rollup"
+      ]
+    },
+    "@rollup/plugin-terser@0.4.4_rollup@4.44.2": {
+      "integrity": "sha512-XHeJC5Bgvs8LfukDwWZp7yeqin6ns8RTl2B9avbejt6tZqsqvVoWI7ZTQrcNsfKEDWBTnTxM8nMDkO2IFFbd0A==",
+      "dependencies": [
+        "rollup",
+        "serialize-javascript",
+        "smob",
+        "terser"
       ],
       "optionalPeers": [
         "rollup"
@@ -216,6 +226,12 @@
     "picomatch@4.0.2": {
       "integrity": "sha512-M7BAV6Rlcy5u+m6oPhAPFgJTzAioX/6B0DxyvDlo9l8+T3nLKbrczg2WLUyzd45L8RqfUMyGPzekbMvX2Ldkwg=="
     },
+    "randombytes@2.1.0": {
+      "integrity": "sha512-vYl3iOX+4CKUWuxGi9Ukhie6fsqXqS9FE2Zaic4tNFD2N2QQaXOMFbuKK4QmDHC0JO6B1Zp41J0LpT0oR68amQ==",
+      "dependencies": [
+        "safe-buffer"
+      ]
+    },
     "resolve@1.22.10": {
       "integrity": "sha512-NPRy+/ncIMeDlTAsuqwKIiferiawhefFJtkNSW0qZJEqMEb+qBt/77B/jGeeek+F0uOeN05CDa6HXbbIgtVX4w==",
       "dependencies": [
@@ -255,6 +271,18 @@
       ],
       "bin": true
     },
+    "safe-buffer@5.2.1": {
+      "integrity": "sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ=="
+    },
+    "serialize-javascript@6.0.2": {
+      "integrity": "sha512-Saa1xPByTTq2gdeFZYLLo+RFE35NHZkAbqZeWNd3BpzppeVisAqpDjcp8dyf6uIvEqJRd46jemmyA4iFIeVk8g==",
+      "dependencies": [
+        "randombytes"
+      ]
+    },
+    "smob@1.5.0": {
+      "integrity": "sha512-g6T+p7QO8npa+/hNx9ohv1E5pVCmWrVCUzUXJyLdMmftX6ER0oiWY/w9knEonLpnOp6b6FenKnMfR8gqwWdwig=="
+    },
     "source-map-support@0.5.21": {
       "integrity": "sha512-uBHU3L3czsIyYXKX88fdrGovxdSCoTGDRZ6SYXtSRxLZUzHg5P/66Ht6uoUlHu9EZod+inXhKo3qQgwXUT/y1w==",
       "dependencies": [
@@ -282,9 +310,9 @@
   "workspace": {
     "dependencies": [
       "npm:@rollup/plugin-node-resolve@^16.0.1",
+      "npm:@rollup/plugin-terser@~0.4.4",
       "npm:handcraft@next",
-      "npm:rollup@^4.43.0",
-      "npm:terser@^5.43.0"
+      "npm:rollup@^4.44.2"
     ]
   }
 }
