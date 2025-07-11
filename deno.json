@@ -6,7 +6,6 @@
 		},
 		"js": "deno bundle --platform browser --minify -o dist/cool-stylesheet.js public/cool-stylesheet.js"
 	},
-	"nodeModulesDir": "auto",
 	"imports": {
 		"handcraft": "npm:handcraft@next"
 	}
