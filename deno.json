@@ -7,6 +7,6 @@
 		"js": "deno bundle --platform browser --minify -o dist/cool-stylesheet.js cool-stylesheet.js"
 	},
 	"imports": {
-		"handcraft": "npm:handcraft@next"
+		"handcraft": "npm:handcraft"
 	}
 }
