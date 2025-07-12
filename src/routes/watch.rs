@@ -34,11 +34,8 @@ pub async fn watch_handler(
 		)
 		.expect("watcher should be created");
 		let directory = match &state.args.command {
-			Commands::Proxy {
-				host: _host,
-				directory,
-			} => directory,
-			Commands::Serve { directory } => directory,
+			Commands::Proxy { directory, .. } => directory,
+			Commands::Serve { directory, .. } => directory,
 		};
 
 		watcher
@@ -58,7 +55,13 @@ pub async fn watch_handler(
 							let c = canonicalize(directory.as_str()).expect("path should be valid");
 							let href = diff_paths(p, c).map(|p| {
 								let p = p.to_str().expect("path should be a string");
-								let base = Utf8Path::new(state.args.style_base.as_str());
+								let base = Utf8Path::new(
+									match &state.args.command {
+										Commands::Proxy { style_base, .. } => style_base,
+										Commands::Serve { style_base, .. } => style_base,
+									}
+									.as_str(),
+								);
 								let p = base.join(p);
 
 								format!("/{p}")

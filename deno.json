@@ -4,9 +4,8 @@
 			"command": "cargo publish --allow-dirty",
 			"dependencies": ["js"]
 		},
-		"js": "rollup -p node-resolve -p 'terser={mangle:true,compress:true}' -o dist/cool-stylesheet.js cool-stylesheet.js"
+		"js": "deno bundle --platform browser --minify -o dist/cool-stylesheet.js cool-stylesheet.js"
 	},
-	"nodeModulesDir": "auto",
 	"imports": {
 		"@rollup/plugin-node-resolve": "npm:@rollup/plugin-node-resolve@^16.0.1",
 		"@rollup/plugin-terser": "npm:@rollup/plugin-terser@^0.4.4",

@@ -17,10 +17,7 @@ pub async fn fallback_handler(
 	req: Request<Body>,
 ) -> Result<Response<Body>, crate::Error> {
 	let res = match &state.args.command {
-		Commands::Proxy {
-			host,
-			directory: _directory,
-		} => {
+		Commands::Proxy { host, .. } => {
 			let path_and_query = req
 				.uri()
 				.path_and_query()
@@ -37,7 +34,7 @@ pub async fn fallback_handler(
 
 			state.client.request(req).await?.into_response()
 		}
-		Commands::Serve { directory } => {
+		Commands::Serve { directory, .. } => {
 			let path = req.uri().path();
 			let is_index = path.ends_with('/');
 			let path = path.trim_start_matches('/');
@@ -83,7 +80,10 @@ pub async fn fallback_handler(
 						el.append(
 							&format!(
 								r#"<script type="module" src="/{}/cool-stylesheet.js"></script>"#,
-								state.args.cool_base
+								match &state.args.command {
+									Commands::Proxy { cool_base, .. } => cool_base,
+									Commands::Serve { cool_base, .. } => cool_base,
+								}
 							),
 							ContentType::Html,
 						);

@@ -1,4 +1,5 @@
 use super::fallback::fallback_handler;
+use crate::args::Commands;
 use axum::{
 	body::to_bytes,
 	extract::{Path, State},
@@ -32,7 +33,16 @@ pub async fn fetch_handler(
 			if let Ok(map) = sourcemap::decode_data_url(url.as_str()) {
 				Some(map)
 			} else {
-				let base_url = Url::parse(format!("http://0.0.0.0:{}", state.args.port).as_str())?;
+				let base_url = Url::parse(
+					format!(
+						"http://0.0.0.0:{}",
+						match state.args.command {
+							Commands::Proxy { port, .. } => port,
+							Commands::Serve { port, .. } => port,
+						}
+					)
+					.as_str(),
+				)?;
 				let base_url = base_url.join(path.as_str())?;
 				let url = base_url.join(url.as_str())?;
 				let mut new_req = Request::new("".into());
