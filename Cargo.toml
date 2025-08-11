@@ -16,7 +16,7 @@ include = ["/dist", "/src"]
 anyhow = { version = "1.0.70", features = ["backtrace"] }
 async-fn-stream = "0.2.2"
 axum = "0.8.1"
-camino = "1.1.6"
+camino = "1.1.11"
 clap = { version = "4.3.11", features = ["derive"] }
 futures = "0.3.28"
 hyper = { version = "1.0.1" }
