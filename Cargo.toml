@@ -13,7 +13,7 @@ keywords = ["css", "hmr"]
 include = ["/dist", "/src"]
 
 [dependencies]
-anyhow = { version = "1.0.70", features = ["backtrace"] }
+anyhow = { version = "1.0.100", features = ["backtrace"] }
 async-fn-stream = "0.2.2"
 axum = "0.8.1"
 camino = "1.1.6"
