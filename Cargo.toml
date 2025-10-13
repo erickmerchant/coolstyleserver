@@ -14,7 +14,7 @@ include = ["/dist", "/src"]
 
 [dependencies]
 anyhow = { version = "1.0.70", features = ["backtrace"] }
-async-fn-stream = "0.2.2"
+async-fn-stream = "0.3.2"
 axum = "0.8.1"
 camino = "1.1.6"
 clap = { version = "4.3.11", features = ["derive"] }
