@@ -72,7 +72,14 @@ pub async fn fallback_handler(
 			Settings {
 				element_content_handlers: [
 					element!("link[rel=stylesheet]", |el| {
-						el.set_attribute("is", "cool-stylesheet")?;
+						let href = el.get_attribute("href");
+
+						if let Some(href) = href {
+							el.replace(
+								&format!(r#"<style is="cool-stylesheet" href="{}"></style>"#, href),
+								ContentType::Html,
+							);
+						}
 
 						Ok(())
 					}),

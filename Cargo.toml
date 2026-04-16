@@ -1,6 +1,6 @@
 [package]
 name = "coolstyleserver"
-version = "2.12.2"
+version = "3.0.0"
 edition = "2021"
 license = "MIT"
 authors = ["Erick Merchant <erickmerchant@gmail.com>"]
@@ -14,7 +14,7 @@ include = ["/dist", "/src"]
 
 [dependencies]
 anyhow = { version = "1.0.70", features = ["backtrace"] }
-async-fn-stream = "0.2.2"
+async-fn-stream = "0.3.2"
 axum = "0.8.1"
 camino = "1.1.6"
 clap = { version = "4.3.11", features = ["derive"] }
@@ -22,13 +22,14 @@ futures = "0.3.28"
 hyper = { version = "1.0.1" }
 hyper-util = { version = "0.1.1", features = ["client-legacy"] }
 include_dir = "0.7.4"
+lightningcss = {version = "1.0.0-alpha.71", default-features = true, features = ["sourcemap"] }
 lol_html = "2.5.0"
 mime_guess = "2.0.5"
 notify = "8.0.0"
+parcel_sourcemap = "2.1.1"
 pathdiff = "0.2.1"
 serde = { version = "1.0.185", features = ["derive"] }
 serde_json = "1.0.100"
-sourcemap = "9.1.2"
 tokio = { version = "1.27.0", features = ["macros", "rt-multi-thread"] }
 tower-http = { version = "0.6.0", features = [
 	"compression-gzip",

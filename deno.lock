@@ -1,16 +1,23 @@
 {
   "version": "5",
   "specifiers": {
-    "npm:handcraft@*": "0.17.0"
+    "jsr:@handcraft/lib@3": "3.0.0",
+    "jsr:@std/html@^1.0.5": "1.0.5"
   },
-  "npm": {
-    "handcraft@0.17.0": {
-      "integrity": "sha512-xXZki34nt/Bajbw3bstdaBma4YV4nHbnN0bSLubws1hSWoYExRSddIOxhQIg+rLy54Lx9BXxTxNN40AquQYOHw=="
+  "jsr": {
+    "@handcraft/lib@3.0.0": {
+      "integrity": "e03d1df79cb28c9e918f919925504b0c0ecc83cda2dd0615dee59dc8791e9e6c",
+      "dependencies": [
+        "jsr:@std/html"
+      ]
+    },
+    "@std/html@1.0.5": {
+      "integrity": "4e2d693f474cae8c16a920fa5e15a3b72267b94b84667f11a50c6dd1cb18d35e"
     }
   },
   "workspace": {
     "dependencies": [
-      "npm:handcraft@*"
+      "jsr:@handcraft/lib@3"
     ]
   }
 }
